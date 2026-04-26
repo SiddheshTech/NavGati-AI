@@ -1,4 +1,4 @@
-import { Home, Layers, Zap, Building2, CreditCard, Mail, ChevronDown, Navigation } from 'lucide-react';
+import { Home, Layers, Zap, Building2, CreditCard, Mail, ChevronDown, Navigation, Radar } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -10,6 +10,7 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Platform', path: '/platform', icon: Layers },
+    { name: 'Control Tower', path: '/control-tower', icon: Radar },
     { name: 'Solutions', path: '#', icon: Zap },
     { name: 'Industries', path: '#', icon: Building2 },
     { name: 'Pricing', path: '#', icon: CreditCard },

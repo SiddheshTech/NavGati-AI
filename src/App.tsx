@@ -8,6 +8,7 @@ import { motion, useScroll, useSpring } from 'motion/react';
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import Platform from './pages/Platform';
+import ControlTower from './pages/ControlTower';
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -30,6 +31,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/platform" element={<Platform />} />
+        <Route path="/control-tower" element={<ControlTower />} />
       </Routes>
 
       {/* Decorative background elements */}
