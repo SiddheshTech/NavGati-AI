@@ -6,29 +6,39 @@ import {
   Github, Chrome, CheckCircle2, Globe, Truck,
   ChevronLeft, Briefcase, ChevronDown
 } from 'lucide-react';
+import { api } from '../lib/api';
 
 export default function Auth() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [role, setRole] = useState('super_admin');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (role === 'super_admin') {
-      navigate('/dashboard/super-admin');
-    } else if (role === 'company_admin') {
-      navigate('/dashboard/company-admin');
-    } else if (role === 'operations_manager') {
-      navigate('/dashboard/operations-manager');
-    } else if (role === 'analyst') {
-      navigate('/dashboard/analyst');
-    } else if (role === 'field_exec') {
-      navigate('/dashboard/field-executive');
-    } else if (role === 'viewer') {
-      navigate('/dashboard/viewer');
-    } else {
-      // Default fallback for demo purposes
-      navigate('/dashboard/viewer');
+    try {
+      const data = await api.login({ role });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      if (role === 'super_admin') {
+        navigate('/dashboard/super-admin');
+      } else if (role === 'company_admin') {
+        navigate('/dashboard/company-admin');
+      } else if (role === 'operations_manager') {
+        navigate('/dashboard/operations-manager');
+      } else if (role === 'analyst') {
+        navigate('/dashboard/analyst');
+      } else if (role === 'field_exec') {
+        navigate('/dashboard/field-executive');
+      } else if (role === 'viewer') {
+        navigate('/dashboard/viewer');
+      } else {
+        // Default fallback for demo purposes
+        navigate('/dashboard/viewer');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      alert(err.message || 'Login failed');
     }
   };
 
