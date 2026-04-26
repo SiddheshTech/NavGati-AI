@@ -5,10 +5,18 @@
 
 import Navbar from './components/Navbar';
 import { motion, useScroll, useSpring } from 'motion/react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Platform from './pages/Platform';
-import ControlTower from './pages/ControlTower';
+import Solutions from './pages/Solutions';
+import Industries from './pages/Industries';
+import Pricing from './pages/Pricing';
+import Contact from './pages/Contact';
+import Auth from './pages/Auth';
+import SuperAdminDashboard from './pages/dashboards/SuperAdminDashboard';
+
+import CompanyAdminDashboard from './pages/dashboards/CompanyAdminDashboard';
+import OperationsManagerDashboard from './pages/dashboards/OperationsManagerDashboard';
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -17,6 +25,11 @@ export default function App() {
     damping: 30,
     restDelta: 0.001
   });
+  
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/dashboard');
+  const isAuth = location.pathname === '/auth';
+  const hideLayout = isDashboard || isAuth;
 
   return (
     <main className="min-h-screen selection:bg-blue-500/30">
@@ -26,23 +39,34 @@ export default function App() {
         style={{ scaleX }}
       />
       
-      <Navbar />
+      {!hideLayout && <Navbar />}
       
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/platform" element={<Platform />} />
-        <Route path="/control-tower" element={<ControlTower />} />
+        <Route path="/solutions" element={<Solutions />} />
+        <Route path="/industries" element={<Industries />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard/super-admin" element={<SuperAdminDashboard />} />
+        <Route path="/dashboard/company-admin" element={<CompanyAdminDashboard />} />
+        <Route path="/dashboard/operations-manager" element={<OperationsManagerDashboard />} />
       </Routes>
 
       {/* Decorative background elements */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-600/10 rounded-full blur-[128px]" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-600/10 rounded-full blur-[128px]" />
-      </div>
+      {!hideLayout && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-600/10 rounded-full blur-[128px]" />
+          <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-600/10 rounded-full blur-[128px]" />
+        </div>
+      )}
 
-      <footer className="py-12 px-6 border-t border-white/5 text-center text-gray-500 text-sm z-20 relative bg-[#020617]">
-        <p>© 2026 NavGati AI Technologies Inc. All rights reserved.</p>
-      </footer>
+      {!hideLayout && (
+        <footer className="py-12 px-6 border-t border-white/5 text-center text-gray-500 text-sm z-20 relative bg-[#020617]">
+          <p>© 2026 NavGati AI Technologies Inc. All rights reserved.</p>
+        </footer>
+      )}
     </main>
   );
 }

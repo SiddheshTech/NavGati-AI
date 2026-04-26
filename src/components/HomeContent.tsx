@@ -1,12 +1,11 @@
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'motion/react';
-import { useRef } from 'react';
-import type { ReactNode } from 'react';
+import React, { useRef } from 'react';
 import { 
   AlertTriangle, Clock, TrendingUp, XCircle, Map, Target,
   RefreshCw, ShieldAlert, Navigation, ArrowUpRight, Train, Truck, Plane
 } from 'lucide-react';
 
-const HighlightText = ({ children }: { children: ReactNode }) => {
+const HighlightText = ({ children }: { children: React.ReactNode }) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start center", "center center"] });
   const opacity = useTransform(scrollYProgress, [0, 1], [0.1, 1]);

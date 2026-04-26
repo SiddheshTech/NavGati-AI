@@ -1,4 +1,4 @@
-import { Home, Layers, Zap, Building2, CreditCard, Mail, ChevronDown, Navigation, Radar } from 'lucide-react';
+import { Home, Layers, Zap, Building2, CreditCard, Mail, ChevronDown, Navigation } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -10,11 +10,10 @@ export default function Navbar() {
   const navItems = [
     { name: 'Home', path: '/', icon: Home },
     { name: 'Platform', path: '/platform', icon: Layers },
-    { name: 'Control Tower', path: '/control-tower', icon: Radar },
-    { name: 'Solutions', path: '#', icon: Zap },
-    { name: 'Industries', path: '#', icon: Building2 },
-    { name: 'Pricing', path: '#', icon: CreditCard },
-    { name: 'Contact', path: '#', icon: Mail },
+    { name: 'Solutions', path: '/solutions', icon: Zap },
+    { name: 'Industries', path: '/industries', icon: Building2 },
+    { name: 'Pricing', path: '/pricing', icon: CreditCard },
+    { name: 'Contact', path: '/contact', icon: Mail },
   ];
 
   return (
@@ -97,15 +96,21 @@ export default function Navbar() {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-3"
         >
-          <button className="hidden sm:block text-gray-400 hover:text-white px-5 py-2.5 text-sm font-semibold transition-colors">
+          <Link 
+            to="/auth" 
+            className="hidden sm:block text-gray-400 hover:text-white px-5 py-2.5 text-sm font-semibold transition-colors"
+          >
             Log In
-          </button>
-          <button className="btn-primary flex items-center gap-2 py-2.5 px-6 shadow-xl shadow-blue-600/20 group">
+          </Link>
+          <Link 
+            to="/auth" 
+            className="btn-primary flex items-center gap-2 py-2.5 px-6 shadow-xl shadow-blue-600/20 group"
+          >
             <span className="text-sm font-bold">Start Free</span>
             <div className="bg-white/20 rounded-full p-0.5 group-hover:translate-x-0.5 transition-transform">
               <ChevronDown size={14} />
             </div>
-          </button>
+          </Link>
         </motion.div>
       </div>
     </nav>
