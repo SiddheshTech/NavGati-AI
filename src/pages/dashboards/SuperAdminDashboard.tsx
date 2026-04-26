@@ -5,13 +5,15 @@ import {
   BrainCircuit, Key, LayoutGrid, Search, Bell, 
   ArrowUpRight, ArrowDownRight, Globe, AlertTriangle, 
   Server, Database, ShieldAlert, Settings, UserCircle, BarChart3,
-  TrendingUp, TrendingDown, Ship, Truck, Box, Plug, Zap, Lock, Fingerprint, Eye, Shield, Link, Share2
+  TrendingUp, TrendingDown, Ship, Truck, Box, Plug, Zap, Lock, Fingerprint, Eye, Shield, Link, Share2, Briefcase
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, AreaChart, Area,
   BarChart, Bar
 } from 'recharts';
+import { api } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 import LiveMap from '../../components/LiveMap';
 
 const data = [
@@ -24,7 +26,36 @@ const data = [
 ];
 
 export default function SuperAdminDashboard() {
+  const { addToast, updateToast } = useToast();
+
+  const handleAction = async (actionName: string) => {
+    const toastId = addToast('loading', `Executing ${actionName}...`);
+    try {
+      const result = await api.executeAction(actionName);
+      updateToast(toastId, 'success', result.message || `${actionName} executed successfully`);
+    } catch (error: any) {
+      updateToast(toastId, 'error', error.message || `Failed to execute ${actionName}`);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('command');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const loadData = async () => {
+      try {
+        const data = await api.getDashboard('super-admin');
+        setDashboardData(data.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'command', label: 'Command Center', icon: LayoutGrid },
@@ -121,8 +152,8 @@ export default function SuperAdminDashboard() {
               <Key size={18} className="text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-bold">PredictRoute Core</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">SysAdmin Role</p>
+              <p className="text-sm font-bold">{user?.name || 'Loading...'}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest">{user?.role?.replace('_', ' ') || 'SysAdmin Role'}</p>
             </div>
           </div>
         </div>
@@ -146,7 +177,7 @@ export default function SuperAdminDashboard() {
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">System Nominal</span>
               </div>
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+              <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="relative p-2 text-gray-400 hover:text-white transition-colors">
                  <Bell size={20} />
                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
@@ -166,10 +197,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg">Real-time global ecosystem telemetry and strategic oversight.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-2 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold text-sm hover:bg-blue-600/20 transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-2 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-xl font-bold text-sm hover:bg-blue-600/20 transition-all">
                       Strategic Report
                     </button>
-                    <button className="px-6 py-2 bg-emerald-600/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold text-sm hover:bg-emerald-600/20 transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-2 bg-emerald-600/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold text-sm hover:bg-emerald-600/20 transition-all">
                       Live Export
                     </button>
                   </div>
@@ -177,27 +208,36 @@ export default function SuperAdminDashboard() {
 
                 {/* Detailed KPI Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {stats.map((stat, i) => (
-                    <div key={i} className="glass p-6 rounded-3xl border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all shadow-xl">
-                       <div className="flex justify-between items-start mb-4">
-                         <h3 className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">{stat.label}</h3>
-                         <div className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-full ${
-                           stat.trend === 'up' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'
-                         }`}>
-                           {stat.change}
-                         </div>
-                       </div>
-                       <div className="text-4xl font-black font-display mb-4 tracking-tighter">{stat.value}</div>
-                       <div className="grid grid-cols-2 gap-y-2 gap-x-4 border-t border-white/5 pt-4">
-                         {stat.details?.map((detail, idx) => (
-                           <div key={idx} className="text-[10px] text-gray-400 font-medium truncate flex items-center gap-1.5 leading-tight">
-                             <div className="w-1 h-1 rounded-full bg-blue-500/50" />
-                             {detail}
+                  {stats.map((stat, i) => {
+                    let displayValue = stat.value;
+                    if (dashboardData) {
+                      if (i === 0) displayValue = dashboardData.activeCompanies.toLocaleString();
+                      if (i === 3) displayValue = dashboardData.systemHealth;
+                      if (i === 4) displayValue = dashboardData.revenueGenerated;
+                      if (i === 6) displayValue = dashboardData.globalAlerts.toString();
+                    }
+                    return (
+                      <div key={i} className="glass p-6 rounded-3xl border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all shadow-xl">
+                         <div className="flex justify-between items-start mb-4">
+                           <h3 className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">{stat.label}</h3>
+                           <div className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-full ${
+                             stat.trend === 'up' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-blue-500/10 text-blue-500'
+                           }`}>
+                             {stat.change}
                            </div>
-                         ))}
-                       </div>
-                    </div>
-                  ))}
+                         </div>
+                         <div className="text-4xl font-black font-display mb-4 tracking-tighter">{displayValue}</div>
+                         <div className="grid grid-cols-2 gap-y-2 gap-x-4 border-t border-white/5 pt-4">
+                           {stat.details?.map((detail, idx) => (
+                             <div key={idx} className="text-[10px] text-gray-400 font-medium truncate flex items-center gap-1.5 leading-tight">
+                               <div className="w-1 h-1 rounded-full bg-blue-500/50" />
+                               {detail}
+                             </div>
+                           ))}
+                         </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Global Live Map Section */}
@@ -216,7 +256,7 @@ export default function SuperAdminDashboard() {
                         <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Global Filters</div>
                         <div className="flex gap-2">
                            {['Ocean', 'Air', 'Road', 'Rail'].map(f => (
-                             <button key={f} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold hover:bg-white/10 transition-all">{f}</button>
+                             <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} key={f} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold hover:bg-white/10 transition-all">{f}</button>
                            ))}
                         </div>
                       </div>
@@ -246,7 +286,7 @@ export default function SuperAdminDashboard() {
                             <h3 className="font-display font-black text-2xl tracking-tight">Enterprise Performance Ranking</h3>
                             <p className="text-gray-500 text-sm italic font-light">Leaderboard based on SLA compliance and recovery speed.</p>
                          </div>
-                         <button className="text-xs font-bold text-blue-400 uppercase tracking-widest hover:underline">View All Clients</button>
+                         <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="text-xs font-bold text-blue-400 uppercase tracking-widest hover:underline">View All Clients</button>
                       </div>
 
                       <div className="space-y-2">
@@ -309,14 +349,14 @@ export default function SuperAdminDashboard() {
                                     <span className="text-[10px] font-black text-gray-400 capitalize">{alert.companies} affected</span>
                                   </div>
                                 </div>
-                                <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                                <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
                                    <ArrowUpRight size={14} className="text-gray-500" />
                                 </button>
                               </div>
                            </div>
                          ))}
                       </div>
-                      <button className="w-full mt-6 py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-red-600/20 active:scale-[0.98] transition-all">
+                      <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full mt-6 py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-red-600/20 active:scale-[0.98] transition-all">
                         Execute Crisis Protocol
                       </button>
                    </div>
@@ -332,10 +372,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Full lifecycle control for PredictRoute AI enterprise organizations.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl shadow-white/5 flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl shadow-white/5 flex items-center gap-2">
                        <Building2 size={16} /> Add New Organization
                     </button>
-                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
                        Bulk Import
                     </button>
                   </div>
@@ -351,7 +391,7 @@ export default function SuperAdminDashboard() {
                        </div>
                        <div className="flex gap-2">
                           {['Enterprise', 'Trial', 'Suspended'].map(filter => (
-                            <button key={filter} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
+                            <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} key={filter} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
                               {filter}
                             </button>
                           ))}
@@ -398,7 +438,7 @@ export default function SuperAdminDashboard() {
                                 <span className="text-xs font-bold text-gray-400">{company.owner}</span>
                              </div>
                              <div className="text-right">
-                                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-600/20 group-hover:border-blue-500/20 transition-all border border-transparent">
+                                <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-600/20 group-hover:border-blue-500/20 transition-all border border-transparent">
                                    <ArrowUpRight size={16} className="text-gray-500 group-hover:text-blue-400" />
                                 </button>
                              </div>
@@ -436,7 +476,7 @@ export default function SuperAdminDashboard() {
                               </div>
                            ))}
                         </div>
-                        <button className="w-full mt-6 py-3 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-2xl font-black text-[10px] uppercase tracking-widest">
+                        <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full mt-6 py-3 bg-blue-600/10 border border-blue-500/30 text-blue-400 rounded-2xl font-black text-[10px] uppercase tracking-widest">
                            Launch Retention Playbook
                         </button>
                      </div>
@@ -475,10 +515,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Platform-wide identity governance and permission hierarchies.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 flex items-center gap-2">
                        <Users size={16} /> Manage Roles
                     </button>
-                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
                        Global MFA Policy
                     </button>
                   </div>
@@ -493,7 +533,7 @@ export default function SuperAdminDashboard() {
                        </div>
                        <div className="flex gap-2">
                           {['Admins', 'Ops', 'Risk High'].map(filter => (
-                            <button key={filter} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all font-mono">
+                            <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} key={filter} className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all font-mono">
                               {filter}
                             </button>
                           ))}
@@ -538,10 +578,10 @@ export default function SuperAdminDashboard() {
                                 <span className="text-xs font-bold text-gray-400">{user.activity}</span>
                              </div>
                              <div className="text-right flex justify-end gap-2">
-                                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-600/20 group-hover:border-red-500/20 transition-all border border-transparent">
+                                <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-600/20 group-hover:border-red-500/20 transition-all border border-transparent">
                                    <ShieldAlert size={16} className="text-gray-500 group-hover:text-red-400" />
                                 </button>
-                                <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-600/20 group-hover:border-blue-500/20 transition-all border border-transparent">
+                                <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-blue-600/20 group-hover:border-blue-500/20 transition-all border border-transparent">
                                    <ArrowUpRight size={16} className="text-gray-500 group-hover:text-blue-400" />
                                 </button>
                              </div>
@@ -576,7 +616,7 @@ export default function SuperAdminDashboard() {
                               </div>
                            ))}
                         </div>
-                        <button className="w-full mt-6 py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-red-600/20">
+                        <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full mt-6 py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-red-600/20">
                            Lock All High-Risk Sessions
                         </button>
                      </div>
@@ -604,7 +644,7 @@ export default function SuperAdminDashboard() {
                               </div>
                            ))}
                         </div>
-                        <button className="w-full mt-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
+                        <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full mt-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
                            Modify Template Matrix
                         </button>
                      </div>
@@ -621,10 +661,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Enterprise orchestration, data pipeline telemetry, and ecosystem connectivity.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl flex items-center gap-2">
                        <Plug size={16} /> Generate API Key
                     </button>
-                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
                        Pipeline Auto-Recovery
                     </button>
                   </div>
@@ -686,7 +726,7 @@ export default function SuperAdminDashboard() {
                              Warning: Rate limit saturation detected on "Titan_ERP_Prod" key (84% capacity).
                            </p>
                         </div>
-                        <button className="w-full py-4 bg-red-600/10 border border-red-500/30 text-red-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
+                        <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-4 bg-red-600/10 border border-red-500/30 text-red-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
                            Revoke Compromised Keys
                         </button>
                      </div>
@@ -722,7 +762,7 @@ export default function SuperAdminDashboard() {
                                 <div className="text-sm font-bold text-gray-200 mb-1">{sys.name}</div>
                                 <div className="flex justify-between items-center">
                                    <span className="text-[8px] font-mono text-gray-600">{sys.latency}</span>
-                                   <button className="text-[8px] font-black text-blue-400 uppercase hover:underline opacity-0 group-hover:opacity-100 transition-all">Retry Sync</button>
+                                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="text-[8px] font-black text-blue-400 uppercase hover:underline opacity-0 group-hover:opacity-100 transition-all">Retry Sync</button>
                                 </div>
                              </div>
                            ))}
@@ -768,7 +808,7 @@ export default function SuperAdminDashboard() {
                                     <h5 className="text-[10px] font-black uppercase text-red-500 mb-1">Integration Error Alert</h5>
                                     <p className="text-sm font-bold text-gray-300">Timeout on Oracle GTM Sync - Blocked 14 event records (APAC Cluster).</p>
                                  </div>
-                                 <button className="ml-auto px-4 py-2 bg-red-500 text-white text-[10px] font-black uppercase rounded-xl shadow-lg shadow-red-500/20">Auto-Recover</button>
+                                 <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="ml-auto px-4 py-2 bg-red-500 text-white text-[10px] font-black uppercase rounded-xl shadow-lg shadow-red-500/20">Auto-Recover</button>
                               </div>
                            </div>
                         </div>
@@ -779,7 +819,7 @@ export default function SuperAdminDashboard() {
                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
                               <Activity size={16} /> API Usage Real-time Logs
                            </h3>
-                           <button className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1 group">
+                           <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1 group">
                               Expand Logs <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                            </button>
                         </div>
@@ -816,10 +856,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Global neural network telemetry, accuracy benchmarks, and computational efficiency.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl flex items-center gap-2">
                        <Zap size={16} /> Deploy New Version
                     </button>
-                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
                        Global Retraining Task
                     </button>
                   </div>
@@ -935,10 +975,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Full financial control center, client profitability, and enterprise invoicing.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl">
                        Export Financials
                     </button>
-                    <button className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/20">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/20">
                        Generate Monthly Audit
                     </button>
                   </div>
@@ -1062,7 +1102,7 @@ export default function SuperAdminDashboard() {
                                      <div className="text-[10px] font-black uppercase text-gray-500">Margin: +62%</div>
                                   </div>
                                </div>
-                               <button className="px-3 py-1 bg-white/5 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 transition-colors">View Details</button>
+                               <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-3 py-1 bg-white/5 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 transition-colors">View Details</button>
                             </div>
                          </div>
                       </div>
@@ -1079,10 +1119,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Enterprise trust, global governance, and advanced threat orchestration.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl">
                        New Compliance Audit
                     </button>
-                    <button className="px-6 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-500/20">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-500/20">
                        Emergency Lockdown
                     </button>
                   </div>
@@ -1153,7 +1193,7 @@ export default function SuperAdminDashboard() {
                                     <div className={`text-[10px] font-black uppercase ${report.status === 'Compliant' ? 'text-emerald-500' : 'text-yellow-500'}`}>{report.status}</div>
                                     <div className="text-xs font-mono font-bold text-gray-400">Score: {report.score}</div>
                                  </div>
-                                 <button className="p-2 hover:bg-white/5 rounded-lg transition-colors"><ArrowUpRight size={14} className="text-gray-500" /></button>
+                                 <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="p-2 hover:bg-white/5 rounded-lg transition-colors"><ArrowUpRight size={14} className="text-gray-500" /></button>
                               </div>
                            </div>
                          ))}
@@ -1304,7 +1344,7 @@ export default function SuperAdminDashboard() {
                             </div>
                          </div>
                       </div>
-                      <button className="w-full mt-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
+                      <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full mt-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
                          Rotate Global Master Key
                       </button>
                    </div>
@@ -1319,7 +1359,7 @@ export default function SuperAdminDashboard() {
                     <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Platform Health</h1>
                     <p className="text-gray-400 font-light text-lg italic">Global infrastructure telemetry, regional uptime, and incident lifecycle management.</p>
                   </div>
-                  <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                  <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
                      View Status Page
                   </button>
                 </div>
@@ -1376,7 +1416,7 @@ export default function SuperAdminDashboard() {
                            <h4 className="text-sm font-bold text-gray-100 mb-1">Latency Spike - APAC</h4>
                            <p className="text-[10px] text-gray-500 font-medium leading-relaxed italic">Engineers are investigating elevated latency across Tokyo nodes.</p>
                         </div>
-                        <button className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
+                        <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
                            Report Global Incident
                         </button>
                       </div>
@@ -1393,10 +1433,10 @@ export default function SuperAdminDashboard() {
                     <p className="text-gray-400 font-light text-lg italic">Executive insights, operational telemetry, and board-level reporting.</p>
                   </div>
                   <div className="flex gap-3">
-                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
                        <ArrowDownRight size={16} /> Export PDF
                     </button>
-                    <button className="px-6 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600/20 transition-all flex items-center gap-2">
+                    <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600/20 transition-all flex items-center gap-2">
                        <ArrowDownRight size={16} /> Export Excel
                     </button>
                   </div>
@@ -1498,7 +1538,7 @@ export default function SuperAdminDashboard() {
                                <span className="text-amber-500">$1.8M</span>
                             </div>
                          </div>
-                         <button className="w-full py-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500/20 transition-all text-center">
+                         <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500/20 transition-all text-center">
                             Generate Pitch Deck Data
                          </button>
                       </div>
@@ -1579,7 +1619,7 @@ export default function SuperAdminDashboard() {
                     <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">System Settings</h1>
                     <p className="text-gray-400 font-light text-lg italic">Platform branding, operational thresholds, and global disaster recovery controls.</p>
                   </div>
-                  <button className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">
+                  <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">
                      Commit Global Config
                   </button>
                 </div>
@@ -1604,7 +1644,7 @@ export default function SuperAdminDashboard() {
                                      <div className="text-[10px] font-mono text-gray-500">512x512 PNG</div>
                                   </div>
                                </div>
-                               <button className="text-[10px] font-black uppercase text-blue-400 hover:text-blue-300">Update</button>
+                               <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="text-[10px] font-black uppercase text-blue-400 hover:text-blue-300">Update</button>
                             </div>
                             <div>
                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 mb-1 block">Accent Hex Strategy</label>
@@ -1665,7 +1705,7 @@ export default function SuperAdminDashboard() {
                                     <div className="text-sm font-bold text-gray-200">{auto.rule}</div>
                                     <div className="text-[10px] text-gray-500 font-mono mt-1">IF: {auto.trigger} → THEN: {auto.action}</div>
                                  </div>
-                                 <button className={`w-10 h-5 rounded-full relative border ${auto.active ? 'bg-emerald-600 border-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-white/5 border-white/20'}`}>
+                                 <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className={`w-10 h-5 rounded-full relative border ${auto.active ? 'bg-emerald-600 border-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-white/5 border-white/20'}`}>
                                     <div className={`absolute top-0.5 bottom-0.5 w-4 rounded-full transition-all ${auto.active ? 'right-0.5 bg-white' : 'left-0.5 bg-gray-500'}`} />
                                  </button>
                               </div>
@@ -1710,7 +1750,7 @@ export default function SuperAdminDashboard() {
                             <p className="text-[10px] text-red-400/80 leading-relaxed italic mb-4">
                                Initiates immediate traffic diversion to the EU-Central shadow infrastructure. This will temporarily degrade API writing speed. Use only in apocalyptic DR scenarios.
                             </p>
-                            <button className="w-full py-3 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20">
+                            <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-3 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20">
                                Initialize Failover Protocol
                             </button>
                          </div>
@@ -1760,16 +1800,16 @@ export default function SuperAdminDashboard() {
                                   <h4 className="text-sm font-bold text-gray-200">Hardware Security Key</h4>
                                   <p className="text-[10px] text-gray-500">Physical MFA is required for all root actions.</p>
                                </div>
-                               <button className="px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase rounded-xl">Verified</button>
+                               <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase rounded-xl">Verified</button>
                             </div>
                             <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex items-center justify-between">
                                <div>
                                   <h4 className="text-sm font-bold text-gray-200">IP Whitelisting</h4>
                                   <p className="text-[10px] text-gray-500">Restrict admin login to registered corporate VPN IPs.</p>
                                </div>
-                               <button className="px-4 py-2 bg-blue-600/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase rounded-xl">Manage</button>
+                               <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-4 py-2 bg-blue-600/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase rounded-xl">Manage</button>
                             </div>
-                            <button className="w-full py-4 bg-red-600/10 border border-red-500/30 text-red-500 rounded-2xl font-black text-xs uppercase tracking-widest">
+                            <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-4 bg-red-600/10 border border-red-500/30 text-red-500 rounded-2xl font-black text-xs uppercase tracking-widest">
                                Initiate Emergency Account Purge
                             </button>
                          </div>
@@ -1794,10 +1834,10 @@ export default function SuperAdminDashboard() {
                    Monitor, regulate, and optimize global {tabs.find(t => t.id === activeTab)?.label.toLowerCase()} across all enterprise clients.
                  </p>
                  <div className="flex gap-4">
-                   <button className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/30 hover:scale-105 transition-all">
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-8 py-3 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/30 hover:scale-105 transition-all">
                      Initialize High-Priority Controller
                    </button>
-                   <button className="px-8 py-3 bg-white/5 border border-white/10 text-gray-400 rounded-2xl font-bold text-xs hover:bg-white/10 transition-all">
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-8 py-3 bg-white/5 border border-white/10 text-gray-400 rounded-2xl font-bold text-xs hover:bg-white/10 transition-all">
                      View System Documentation
                    </button>
                  </div>

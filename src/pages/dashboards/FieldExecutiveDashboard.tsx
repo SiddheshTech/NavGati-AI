@@ -5,9 +5,40 @@ import {
   MapPin, CheckCircle, Camera, Clock, ChevronRight,
   PhoneCall, UploadCloud, AlertOctagon, UserCircle
 } from 'lucide-react';
+import { api } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 export default function FieldExecutiveDashboard() {
+  const { addToast, updateToast } = useToast();
+
+  const handleAction = async (actionName: string) => {
+    const toastId = addToast('loading', `Executing ${actionName}...`);
+    try {
+      const result = await api.executeAction(actionName);
+      updateToast(toastId, 'success', result.message || `${actionName} executed successfully`);
+    } catch (error: any) {
+      updateToast(toastId, 'error', error.message || `Failed to execute ${actionName}`);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('tasks');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const loadData = async () => {
+      try {
+        const data = await api.getDashboard('field-executive');
+        setDashboardData(data.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'tasks', label: 'Daily Tasks', icon: ClipboardList },
@@ -31,10 +62,10 @@ export default function FieldExecutiveDashboard() {
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3 font-black text-xl tracking-tighter text-blue-400 mb-2">
             <Truck size={24} />
-            FIELD NAVGATI
+            {user?.name?.toUpperCase() || 'FIELD NAVGATI'}
           </div>
           <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-gray-500">
-            Supervisor terminal
+            {user?.role?.replace('_', ' ') || 'Supervisor terminal'}
           </div>
         </div>
 
@@ -69,7 +100,7 @@ export default function FieldExecutiveDashboard() {
            </div>
            
            <div className="flex items-center gap-4">
-              <button className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 animate-pulse relative">
+              <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 animate-pulse relative">
                 <AlertOctagon size={18} />
               </button>
               <div className="w-10 h-10 rounded-full bg-blue-600/20 border border-blue-500/50 flex items-center justify-center">
@@ -96,11 +127,11 @@ export default function FieldExecutiveDashboard() {
                 {/* Quick Stats Grid */}
                 <div className="grid grid-cols-2 gap-4">
                    <div className="glass p-4 rounded-2xl border-white/5">
-                      <div className="text-3xl font-black mb-1">12</div>
+                      <div className="text-3xl font-black mb-1">{dashboardData ? dashboardData.assignedShipments - dashboardData.deliveriesCompletedToday : 12}</div>
                       <div className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Pending Drops</div>
                    </div>
                    <div className="glass p-4 rounded-2xl border-white/5">
-                      <div className="text-3xl font-black mb-1 text-emerald-400">8</div>
+                      <div className="text-3xl font-black mb-1 text-emerald-400">{dashboardData?.deliveriesCompletedToday || 8}</div>
                       <div className="text-[10px] uppercase font-bold text-gray-500 tracking-widest">Completed</div>
                    </div>
                 </div>
@@ -157,13 +188,13 @@ export default function FieldExecutiveDashboard() {
 
                    <div>
                      <label className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2 block">Upload Verification Context</label>
-                     <button className="w-full py-12 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
+                     <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-12 border-2 border-dashed border-white/10 rounded-xl flex flex-col items-center justify-center text-gray-500 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
                        <Camera size={32} className="mb-4" />
                        <span className="font-bold text-sm">Tap to Snap Photo or Upload POD</span>
                      </button>
                    </div>
 
-                   <button className="w-full py-4 bg-blue-600 rounded-xl font-black text-lg uppercase tracking-wider shadow-[0_0_30px_rgba(37,99,235,0.4)] active:scale-[0.98] transition-transform">
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full py-4 bg-blue-600 rounded-xl font-black text-lg uppercase tracking-wider shadow-[0_0_30px_rgba(37,99,235,0.4)] active:scale-[0.98] transition-transform">
                      Confirm Action
                    </button>
                 </div>

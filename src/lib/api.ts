@@ -41,4 +41,8 @@ export const api = {
   },
   
   getDashboard: (roleEndpoint: string) => fetchWithAuth(`/dashboard/${roleEndpoint}`),
+  executeAction: (actionName: string, payload?: any) => fetchWithAuth('/dashboard/action', {
+    method: 'POST',
+    body: JSON.stringify({ actionName, payload })
+  }),
 };

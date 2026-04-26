@@ -9,6 +9,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer
 } from 'recharts';
+import { api } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 const performanceData = [
   { month: 'Jan', onTime: 92 },
@@ -20,7 +22,36 @@ const performanceData = [
 ];
 
 export default function ViewerDashboard() {
+  const { addToast, updateToast } = useToast();
+
+  const handleAction = async (actionName: string) => {
+    const toastId = addToast('loading', `Executing ${actionName}...`);
+    try {
+      const result = await api.executeAction(actionName);
+      updateToast(toastId, 'success', result.message || `${actionName} executed successfully`);
+    } catch (error: any) {
+      updateToast(toastId, 'error', error.message || `Failed to execute ${actionName}`);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('visibility');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const loadData = async () => {
+      try {
+        const data = await api.getDashboard('viewer');
+        setDashboardData(data.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'visibility', label: 'Shipment Visibility', icon: Map },
@@ -73,8 +104,8 @@ export default function ViewerDashboard() {
               <Package size={18} className="text-gray-300" />
             </div>
             <div>
-              <p className="text-sm font-bold truncate max-w-[150px]">Global Tech Inc.</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">Partner Vendor</p>
+              <p className="text-sm font-bold truncate max-w-[150px]">{user?.name || 'Loading...'}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest">{user?.role?.replace('_', ' ') || 'Partner Vendor'}</p>
             </div>
           </div>
         </div>
@@ -96,11 +127,11 @@ export default function ViewerDashboard() {
            
            <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                 <button className="text-[10px] uppercase font-bold tracking-widest text-blue-400 hover:text-blue-300 transition-colors">
+                 <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="text-[10px] uppercase font-bold tracking-widest text-blue-400 hover:text-blue-300 transition-colors">
                    Download Report PDF
                  </button>
               </div>
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+              <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="relative p-2 text-gray-400 hover:text-white transition-colors">
                  <Bell size={20} />
               </button>
            </div>
@@ -120,16 +151,16 @@ export default function ViewerDashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                   <div className="glass p-5 rounded-2xl border-white/5">
-                    <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">Active Deliveries</h3>
-                    <p className="text-3xl font-black font-display">12</p>
+                    <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">Total Shipments</h3>
+                    <p className="text-3xl font-black font-display">{dashboardData?.totalShipments || 0}</p>
                   </div>
                   <div className="glass p-5 rounded-2xl border-white/5">
-                    <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">On Schedule</h3>
-                    <p className="text-3xl font-black font-display text-emerald-400">10</p>
+                    <h3 className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-1">Delivered</h3>
+                    <p className="text-3xl font-black font-display text-emerald-400">{dashboardData?.delivered || 0}</p>
                   </div>
-                  <div className="glass p-5 rounded-2xl border-white/5 bg-red-900/10 border-red-500/10">
-                    <h3 className="text-[10px] uppercase font-bold text-red-500/70 tracking-widest mb-1">Delayed</h3>
-                    <p className="text-3xl font-black font-display text-red-400">2</p>
+                  <div className="glass p-5 rounded-2xl border-white/5 bg-blue-900/10 border-blue-500/10">
+                    <h3 className="text-[10px] uppercase font-bold text-blue-500/70 tracking-widest mb-1">In Transit</h3>
+                    <p className="text-3xl font-black font-display text-blue-400">{dashboardData?.inTransit || 0}</p>
                   </div>
                 </div>
 
@@ -236,10 +267,10 @@ export default function ViewerDashboard() {
                    </div>
 
                    <div className="flex items-center gap-4 pt-2">
-                     <button className="flex-1 py-4 bg-blue-600 rounded-xl font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-colors flex items-center justify-center gap-2">
+                     <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="flex-1 py-4 bg-blue-600 rounded-xl font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:bg-blue-500 transition-colors flex items-center justify-center gap-2">
                        <MessageSquare size={18} /> Submit Ticket
                      </button>
-                     <button className="px-6 py-4 border border-white/10 rounded-xl font-bold uppercase tracking-wider hover:bg-white/5 transition-colors text-xs text-gray-400">
+                     <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="px-6 py-4 border border-white/10 rounded-xl font-bold uppercase tracking-wider hover:bg-white/5 transition-colors text-xs text-gray-400">
                        Contact AM
                      </button>
                    </div>
@@ -257,7 +288,7 @@ export default function ViewerDashboard() {
                  <p className="text-gray-400 max-w-md">
                    Download your monthly billing statements, SLA delivery reports, and shipment histories.
                    <br/><br/>
-                   <button className="btn-primary text-sm px-6 py-2 flex items-center justify-center gap-2 mx-auto">
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="btn-primary text-sm px-6 py-2 flex items-center justify-center gap-2 mx-auto">
                      <Download size={16} /> Export All (PDF)
                    </button>
                  </p>

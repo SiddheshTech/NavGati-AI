@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { 
   Building, Users, Plug, Settings, BarChart3, CreditCard, 
@@ -6,9 +6,40 @@ import {
   Activity, Navigation, Truck, Box, ShieldAlert, Route, Crosshair
 } from 'lucide-react';
 import LiveMap from '../../components/LiveMap';
+import { api } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 export default function OperationsManagerDashboard() {
+  const { addToast, updateToast } = useToast();
+
+  const handleAction = async (actionName: string) => {
+    const toastId = addToast('loading', `Executing ${actionName}...`);
+    try {
+      const result = await api.executeAction(actionName);
+      updateToast(toastId, 'success', result.message || `${actionName} executed successfully`);
+    } catch (error: any) {
+      updateToast(toastId, 'error', error.message || `Failed to execute ${actionName}`);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('live_control');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const loadData = async () => {
+      try {
+        const data = await api.getDashboard('operations-manager');
+        setDashboardData(data.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'live_control', label: 'Live Control Tower', icon: Navigation },
@@ -57,7 +88,7 @@ export default function OperationsManagerDashboard() {
               <Activity size={18} className="text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-bold truncate max-w-[150px]">Sarah Connor</p>
+              <p className="text-sm font-bold truncate max-w-[150px]">{user?.name || 'Loading...'}</p>
               <p className="text-[10px] text-gray-500 uppercase tracking-widest">Ops Manager</p>
             </div>
           </div>
@@ -80,9 +111,11 @@ export default function OperationsManagerDashboard() {
            <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-500">2 Active Interventions</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-yellow-500">
+                  {dashboardData?.disruptionAlerts || 0} Active Interventions
+                </span>
               </div>
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+              <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="relative p-2 text-gray-400 hover:text-white transition-colors">
                  <Bell size={20} />
                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
@@ -104,10 +137,10 @@ export default function OperationsManagerDashboard() {
                  </div>
                  <div className="flex gap-4">
                    <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-bold flex items-center gap-2">
-                     <span className="w-2 h-2 rounded-full bg-blue-500"></span> 1,234 On Track
+                     <span className="w-2 h-2 rounded-full bg-blue-500"></span> {dashboardData?.activeShipments || 0} On Track
                    </div>
                    <div className="px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-xs font-bold text-red-400 flex items-center gap-2">
-                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> 12 At Risk
+                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> {dashboardData?.pendingRouteApprovals || 0} At Risk
                    </div>
                  </div>
                </div>
@@ -134,7 +167,7 @@ export default function OperationsManagerDashboard() {
                  <p className="text-gray-400 max-w-md">
                    This module provides specialized tools for {tabs.find(t => t.id === activeTab)?.label.toLowerCase()} operations.
                    <br/><br/>
-                   <button className="btn-primary text-sm px-6 py-2">Initialize Module UI</button>
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="btn-primary text-sm px-6 py-2">Initialize Module UI</button>
                  </p>
              </motion.div>
            )}

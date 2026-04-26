@@ -10,6 +10,8 @@ import {
   Tooltip, ResponsiveContainer, AreaChart, Area,
   BarChart, Bar
 } from 'recharts';
+import { api } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 const delayData = [
   { name: 'Mon', delay: 12 },
@@ -22,7 +24,36 @@ const delayData = [
 ];
 
 export default function CompanyAdminDashboard() {
+  const { addToast, updateToast } = useToast();
+
+  const handleAction = async (actionName: string) => {
+    const toastId = addToast('loading', `Executing ${actionName}...`);
+    try {
+      const result = await api.executeAction(actionName);
+      updateToast(toastId, 'success', result.message || `${actionName} executed successfully`);
+    } catch (error: any) {
+      updateToast(toastId, 'error', error.message || `Failed to execute ${actionName}`);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('overview');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const loadData = async () => {
+      try {
+        const data = await api.getDashboard('company-admin');
+        setDashboardData(data.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'overview', label: 'Organization Overview', icon: Building },
@@ -80,8 +111,8 @@ export default function CompanyAdminDashboard() {
               <Building size={18} className="text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-bold truncate max-w-[150px]">Titan Logistics Inc.</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">Enterprise Plan</p>
+              <p className="text-sm font-bold truncate max-w-[150px]">{user?.name || 'Loading...'}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest">{user?.role?.replace('_', ' ') || 'Enterprise Plan'}</p>
             </div>
           </div>
         </div>
@@ -105,7 +136,7 @@ export default function CompanyAdminDashboard() {
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-500">All Systems Go</span>
               </div>
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+              <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="relative p-2 text-gray-400 hover:text-white transition-colors">
                  <Bell size={20} />
                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
@@ -126,25 +157,33 @@ export default function CompanyAdminDashboard() {
 
                 {/* Metrics Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {stats.map((stat, i) => (
-                    <div key={i} className="glass p-6 rounded-2xl border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all">
-                       <h3 className="text-xs uppercase font-bold tracking-widest text-gray-500 mb-2">{stat.label}</h3>
-                       <div className="flex items-end justify-between">
-                         <div className="text-3xl font-black font-display">{stat.value}</div>
-                         <div className={`flex items-center gap-1 text-sm font-bold ${
-                           stat.trend === 'up' && stat.label.includes('Risk') ? 'text-red-400' :
-                           stat.trend === 'up' && stat.label.includes('Cost') ? 'text-red-400' :
-                           stat.trend === 'up' ? 'text-emerald-400' : 
-                           stat.trend === 'down' && stat.label.includes('Risk') ? 'text-emerald-400' :
-                           stat.trend === 'down' && stat.label.includes('Cost') ? 'text-emerald-400' :
-                           stat.trend === 'down' ? 'text-red-400' : 'text-gray-400'
-                         }`}>
-                           {stat.trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                           {stat.change}
+                  {stats.map((stat, i) => {
+                    let displayValue = stat.value;
+                    if (dashboardData) {
+                      if (i === 0) displayValue = dashboardData.monthlyShipments.toLocaleString();
+                      if (i === 3) displayValue = dashboardData.slaCompliance;
+                    }
+                    
+                    return (
+                      <div key={i} className="glass p-6 rounded-2xl border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+                         <h3 className="text-xs uppercase font-bold tracking-widest text-gray-500 mb-2">{stat.label}</h3>
+                         <div className="flex items-end justify-between">
+                           <div className="text-3xl font-black font-display">{displayValue}</div>
+                           <div className={`flex items-center gap-1 text-sm font-bold ${
+                             stat.trend === 'up' && stat.label.includes('Risk') ? 'text-red-400' :
+                             stat.trend === 'up' && stat.label.includes('Cost') ? 'text-red-400' :
+                             stat.trend === 'up' ? 'text-emerald-400' : 
+                             stat.trend === 'down' && stat.label.includes('Risk') ? 'text-emerald-400' :
+                             stat.trend === 'down' && stat.label.includes('Cost') ? 'text-emerald-400' :
+                             stat.trend === 'down' ? 'text-red-400' : 'text-gray-400'
+                           }`}>
+                             {stat.trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                             {stat.change}
+                           </div>
                          </div>
-                       </div>
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -207,7 +246,7 @@ export default function CompanyAdminDashboard() {
                  <p className="text-gray-400 max-w-md">
                    This module handles the deeper organizational capabilities for {tabs.find(t => t.id === activeTab)?.label.toLowerCase()}.
                    <br/><br/>
-                   <button className="btn-primary text-sm px-6 py-2">Initialize Module UI</button>
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="btn-primary text-sm px-6 py-2">Initialize Module UI</button>
                  </p>
              </motion.div>
            )}

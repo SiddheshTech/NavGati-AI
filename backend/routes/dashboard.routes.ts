@@ -114,4 +114,18 @@ router.get('/viewer', authorizeRoles('viewer', 'company_admin', 'operations_mana
   });
 });
 
+// Generic Action Endpoint
+router.post('/action', authorizeRoles('super_admin', 'company_admin', 'operations_manager', 'analyst', 'field_executive', 'viewer'), (req, res) => {
+  const { actionName, payload } = req.body;
+  
+  // Simulate processing delay
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: `Action "${actionName}" executed successfully.`,
+      timestamp: new Date().toISOString()
+    });
+  }, 1000);
+});
+
 export default router;

@@ -9,6 +9,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, LineChart, Line, Legend
 } from 'recharts';
+import { api } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 const forecastData = [
   { month: 'Jan', actualDelay: 12, predictedDelay: 11 },
@@ -23,7 +25,36 @@ const forecastData = [
 ];
 
 export default function AnalystDashboard() {
+  const { addToast, updateToast } = useToast();
+
+  const handleAction = async (actionName: string) => {
+    const toastId = addToast('loading', `Executing ${actionName}...`);
+    try {
+      const result = await api.executeAction(actionName);
+      updateToast(toastId, 'success', result.message || `${actionName} executed successfully`);
+    } catch (error: any) {
+      updateToast(toastId, 'error', error.message || `Failed to execute ${actionName}`);
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('predictive');
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    const loadData = async () => {
+      try {
+        const data = await api.getDashboard('analyst');
+        setDashboardData(data.data);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    };
+    loadData();
+  }, []);
 
   const tabs = [
     { id: 'predictive', label: 'Predictive Analytics', icon: LineChartIcon },
@@ -78,8 +109,8 @@ export default function AnalystDashboard() {
               <Target size={18} className="text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-bold truncate max-w-[150px]">David Miller</p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest">Data Analyst</p>
+              <p className="text-sm font-bold truncate max-w-[150px]">{user?.name || 'Loading...'}</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest">{user?.role?.replace('_', ' ') || 'Data Analyst'}</p>
             </div>
           </div>
         </div>
@@ -103,7 +134,7 @@ export default function AnalystDashboard() {
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                 <span className="text-[10px] uppercase font-bold tracking-widest text-blue-500">Models Synced</span>
               </div>
-              <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
+              <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="relative p-2 text-gray-400 hover:text-white transition-colors">
                  <Bell size={20} />
               </button>
            </div>
@@ -123,23 +154,32 @@ export default function AnalystDashboard() {
 
                 {/* Metrics Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {metrics.map((stat, i) => (
-                    <div key={i} className="glass p-6 rounded-2xl border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all">
-                       <h3 className="text-xs uppercase font-bold tracking-widest text-gray-500 mb-2">{stat.label}</h3>
-                       <div className="flex items-end justify-between">
-                         <div className="text-3xl font-black font-display">{stat.value}</div>
-                         <div className={`flex items-center gap-1 text-sm font-bold ${
-                           stat.trend === 'up' && stat.label.includes('Delay') ? 'text-red-400' :
-                           stat.trend === 'up' ? 'text-emerald-400' : 
-                           stat.trend === 'down' && stat.label.includes('Delay') ? 'text-emerald-400' :
-                           stat.trend === 'down' ? 'text-red-400' : 'text-gray-400'
-                         }`}>
-                           {stat.trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
-                           {stat.change}
+                  {metrics.map((stat, i) => {
+                    // Inject dynamic data for the first two metrics
+                    let displayValue = stat.value;
+                    if (dashboardData) {
+                      if (i === 0) displayValue = dashboardData.kpiTracking.onTimeDelivery;
+                      if (i === 1) displayValue = dashboardData.riskScoreAverage + ' (Risk)';
+                    }
+                    
+                    return (
+                      <div key={i} className="glass p-6 rounded-2xl border-white/5 relative overflow-hidden group hover:border-blue-500/30 transition-all">
+                         <h3 className="text-xs uppercase font-bold tracking-widest text-gray-500 mb-2">{stat.label}</h3>
+                         <div className="flex items-end justify-between">
+                           <div className="text-3xl font-black font-display">{displayValue}</div>
+                           <div className={`flex items-center gap-1 text-sm font-bold ${
+                             stat.trend === 'up' && stat.label.includes('Delay') ? 'text-red-400' :
+                             stat.trend === 'up' ? 'text-emerald-400' : 
+                             stat.trend === 'down' && stat.label.includes('Delay') ? 'text-emerald-400' :
+                             stat.trend === 'down' ? 'text-red-400' : 'text-gray-400'
+                           }`}>
+                             {stat.trend === 'up' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                             {stat.change}
+                           </div>
                          </div>
-                       </div>
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -203,7 +243,7 @@ export default function AnalystDashboard() {
                            </div>
                          ))}
                       </div>
-                      <button className="w-full mt-4 py-3 rounded-xl border border-white/10 text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-colors">
+                      <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="w-full mt-4 py-3 rounded-xl border border-white/10 text-xs font-bold uppercase tracking-widest hover:bg-white/5 transition-colors">
                         Run Simulation Lab
                       </button>
                    </div>
@@ -224,7 +264,7 @@ export default function AnalystDashboard() {
                  <p className="text-gray-400 max-w-md">
                    This module provides advanced data modeling and reporting for {tabs.find(t => t.id === activeTab)?.label.toLowerCase()}.
                    <br/><br/>
-                   <button className="btn-primary text-sm px-6 py-2">Load Data Models</button>
+                   <button onClick={(e) => { e.stopPropagation(); handleAction(e.currentTarget.textContent?.trim() || 'Action'); }} className="btn-primary text-sm px-6 py-2">Load Data Models</button>
                  </p>
              </motion.div>
            )}
