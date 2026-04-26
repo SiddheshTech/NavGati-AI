@@ -5,7 +5,7 @@ import {
   BrainCircuit, Key, LayoutGrid, Search, Bell, 
   ArrowUpRight, ArrowDownRight, Globe, AlertTriangle, 
   Server, Database, ShieldAlert, Settings, UserCircle, BarChart3,
-  TrendingUp, TrendingDown, Ship, Truck, Box
+  TrendingUp, TrendingDown, Ship, Truck, Box, Plug, Zap, Lock, Fingerprint, Eye, Shield, Link, Share2
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
@@ -617,116 +617,1170 @@ export default function SuperAdminDashboard() {
              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
                 <div className="flex justify-between items-end">
                   <div>
-                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Integrations & APIs</h1>
-                    <p className="text-gray-400 font-light text-lg italic">Platform connectivity, data pipeline health, and third-party orchestration.</p>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Integrations & API Control</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Enterprise orchestration, data pipeline telemetry, and ecosystem connectivity.</p>
                   </div>
                   <div className="flex gap-3">
                     <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl flex items-center gap-2">
-                       <Plug size={16} /> New API Key
+                       <Plug size={16} /> Generate API Key
                     </button>
                     <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
-                       Force Pipeline Refresh
+                       Pipeline Auto-Recovery
                     </button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Pipeline Health */}
+                  {/* Section A: API Management */}
+                  <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl flex flex-col justify-between">
+                     <div>
+                        <div className="flex items-center justify-between mb-8">
+                           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
+                              <Key size={16} /> API Management
+                           </h3>
+                        </div>
+
+                        <div className="space-y-6">
+                           <div>
+                              <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 italic">Active Keys & Scopes</div>
+                              <div className="space-y-3">
+                                 {[
+                                   { name: 'Titan_ERP_Prod', scope: 'Read/Write', exp: '14 days', status: 'Active' },
+                                   { name: 'Ocean_Analytics', scope: 'Read-only', exp: 'Expired', status: 'Revoked' },
+                                   { name: 'Global_WMS_Hub', scope: 'Admin', exp: '240 days', status: 'Active' },
+                                 ].map((key, i) => (
+                                   <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
+                                      <div>
+                                         <div className="text-xs font-bold text-gray-200">{key.name}</div>
+                                         <div className="text-[10px] text-gray-600 font-bold uppercase tracking-tighter">{key.scope} • Exp: {key.exp}</div>
+                                      </div>
+                                      <div className={`w-2 h-2 rounded-full ${key.status === 'Active' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-red-500'}`} />
+                                   </div>
+                                 ))}
+                              </div>
+                           </div>
+
+                           <div className="pt-6 border-t border-white/5">
+                              <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 italic">Webhook Setup</div>
+                              <div className="space-y-3">
+                                 {[
+                                   { event: 'Shipment Created', url: 'https://hooks.titan.com/...' },
+                                   { event: 'ETA Updated', url: 'https://api.ocean.net/hooks' },
+                                 ].map((hook, i) => (
+                                   <div key={i} className="p-4 bg-black/40 rounded-2xl border border-white/5 flex items-center gap-4">
+                                      <Share2 size={16} className="text-blue-500" />
+                                      <div className="overflow-hidden">
+                                         <div className="text-[10px] font-black text-gray-200 uppercase">{hook.event}</div>
+                                         <div className="text-[10px] text-gray-600 font-mono truncate">{hook.url}</div>
+                                      </div>
+                                   </div>
+                                 ))}
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="mt-8 space-y-4">
+                        <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
+                           <p className="text-[10px] text-yellow-500 uppercase font-black tracking-tighter leading-tight italic">
+                             Warning: Rate limit saturation detected on "Titan_ERP_Prod" key (84% capacity).
+                           </p>
+                        </div>
+                        <button className="w-full py-4 bg-red-600/10 border border-red-500/30 text-red-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
+                           Revoke Compromised Keys
+                        </button>
+                     </div>
+                  </div>
+
+                  {/* Section B/C: Systems & Data Pipeline */}
+                  <div className="lg:col-span-2 space-y-6">
+                     <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl">
+                        <div className="flex items-center justify-between mb-8">
+                           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
+                              <Server size={16} /> ERP / TMS / WMS Monitoring
+                           </h3>
+                           <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Global Sync Active</span>
+                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+                           {[
+                             { name: 'SAP S/4HANA', type: 'ERP', latency: '42ms', status: 'Healthy' },
+                             { name: 'Oracle GTM', type: 'TMS', latency: '128ms', status: 'Warning' },
+                             { name: 'BlueYonder', type: 'WMS', latency: '24ms', status: 'Healthy' },
+                             { name: 'Project44', type: 'GPS', latency: '8ms', status: 'Healthy' },
+                             { name: 'Salesforce', type: 'CRM', latency: '412ms', status: 'Healthy' },
+                             { name: 'FleetMaster', type: 'Fleet', latency: '12ms', status: 'Healthy' },
+                           ].map((sys, i) => (
+                             <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl group hover:border-white/20 transition-all">
+                                <div className="flex justify-between items-start mb-2">
+                                   <div className="text-[10px] font-black text-gray-500 uppercase">{sys.type}</div>
+                                   <div className={`w-1.5 h-1.5 rounded-full ${sys.status === 'Healthy' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                                </div>
+                                <div className="text-sm font-bold text-gray-200 mb-1">{sys.name}</div>
+                                <div className="flex justify-between items-center">
+                                   <span className="text-[8px] font-mono text-gray-600">{sys.latency}</span>
+                                   <button className="text-[8px] font-black text-blue-400 uppercase hover:underline opacity-0 group-hover:opacity-100 transition-all">Retry Sync</button>
+                                </div>
+                             </div>
+                           ))}
+                        </div>
+
+                        <div>
+                           <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4 italic">Data Pipeline Health</h4>
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              <div className="space-y-2">
+                                 <div className="flex justify-between text-[8px] font-black uppercase text-gray-400">
+                                    <span>Ingestion Status</span>
+                                    <span>99.4%</span>
+                                 </div>
+                                 <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 w-[99.4%]" />
+                                 </div>
+                              </div>
+                              <div className="space-y-2">
+                                 <div className="flex justify-between text-[8px] font-black uppercase text-gray-400">
+                                    <span>Event Stream Latency</span>
+                                    <span>182ms</span>
+                                 </div>
+                                 <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-blue-500 w-[42%]" />
+                                 </div>
+                              </div>
+                              <div className="space-y-2">
+                                 <div className="flex justify-between text-[8px] font-black uppercase text-gray-400">
+                                    <span>Anomaly Detection</span>
+                                    <span className="text-emerald-500">Active</span>
+                                 </div>
+                                 <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-emerald-500 w-full" />
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div className="mt-8 p-6 bg-red-500/5 border border-red-500/10 rounded-3xl relative overflow-hidden group">
+                              <div className="absolute right-0 top-0 bottom-0 w-1 bg-red-500" />
+                              <div className="flex items-center gap-4">
+                                 <AlertTriangle size={24} className="text-red-500" />
+                                 <div>
+                                    <h5 className="text-[10px] font-black uppercase text-red-500 mb-1">Integration Error Alert</h5>
+                                    <p className="text-sm font-bold text-gray-300">Timeout on Oracle GTM Sync - Blocked 14 event records (APAC Cluster).</p>
+                                 </div>
+                                 <button className="ml-auto px-4 py-2 bg-red-500 text-white text-[10px] font-black uppercase rounded-xl shadow-lg shadow-red-500/20">Auto-Recover</button>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl overflow-hidden relative">
+                        <div className="flex justify-between items-center mb-8">
+                           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
+                              <Activity size={16} /> API Usage Real-time Logs
+                           </h3>
+                           <button className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-1 group">
+                              Expand Logs <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                           </button>
+                        </div>
+                        <div className="space-y-2 font-mono text-[10px]">
+                           {[
+                             { method: 'POST', endpoint: '/v1/shipments', code: 202, time: '822ms ago' },
+                             { method: 'GET', endpoint: '/v1/tracking/live', code: 200, time: '1.2s ago' },
+                             { method: 'PUT', endpoint: '/v1/erp/sync/status', code: 504, time: '4.8s ago', alert: true },
+                             { method: 'POST', endpoint: '/v2/ai/route/optimize', code: 200, time: '12s ago' },
+                           ].map((log, i) => (
+                             <div key={i} className={`flex items-center justify-between p-2 rounded-lg ${log.alert ? 'bg-red-500/10' : 'hover:bg-white/5'} transition-all`}>
+                                <div className="flex items-center gap-4">
+                                   <span className={`w-12 font-black ${log.method === 'GET' ? 'text-blue-400' : 'text-emerald-400'}`}>{log.method}</span>
+                                   <span className="text-gray-400">{log.endpoint}</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                   <span className={log.code >= 400 ? 'text-red-500' : 'text-emerald-500'}>{log.code}</span>
+                                   <span className="text-gray-600">{log.time}</span>
+                                </div>
+                             </div>
+                           ))}
+                        </div>
+                     </div>
+                  </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'ai' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">AI Model Center</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Global neural network telemetry, accuracy benchmarks, and computational efficiency.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl flex items-center gap-2">
+                       <Zap size={16} /> Deploy New Version
+                    </button>
+                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                       Global Retraining Task
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Model Performance Overview */}
                   <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl lg:col-span-2">
                     <div className="flex justify-between items-center mb-8">
-                       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Live Data Pipelines</h3>
-                       <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[10px] font-black text-emerald-500 uppercase">Operational</span>
+                       <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">Neural Network Benchmarks</h3>
+                       <div className="flex items-center gap-4 text-[10px] font-black">
+                          <span className="flex items-center gap-1 text-emerald-500"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Accuracy: 99.4%</span>
+                          <span className="flex items-center gap-1 text-blue-500"><div className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Drift: 0.02%</span>
                        </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                       <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                          <div className="text-[8px] font-black uppercase text-gray-500 mb-1">Ingestion Rate</div>
-                          <div className="text-xl font-black">4,284 <span className="text-[10px] font-normal text-gray-600">eps</span></div>
-                       </div>
-                       <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                          <div className="text-[8px] font-black uppercase text-gray-500 mb-1">Avg Latency</div>
-                          <div className="text-xl font-black text-blue-400">182 <span className="text-[10px] font-normal text-gray-600">ms</span></div>
-                       </div>
-                       <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                          <div className="text-[8px] font-black uppercase text-gray-500 mb-1">Failed Records</div>
-                          <div className="text-xl font-black text-red-500">12 <span className="text-[10px] font-normal text-gray-600">last hr</span></div>
-                       </div>
+                    <div className="h-80 mb-8">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={[
+                          { name: 'T-Minus 6', val: 92 }, { name: 'T-Minus 5', val: 94 },
+                          { name: 'T-Minus 4', val: 91 }, { name: 'T-Minus 3', val: 96 },
+                          { name: 'T-Minus 2', val: 97 }, { name: 'T-Minus 1', val: 99.4 }
+                        ]}>
+                          <defs>
+                            <linearGradient id="colorAI" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <Area type="monotone" dataKey="val" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorAI)" />
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                          <XAxis dataKey="name" hide />
+                          <YAxis domain={[80, 100]} hide />
+                          <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
+                        </AreaChart>
+                      </ResponsiveContainer>
                     </div>
 
-                    <div className="space-y-4">
-                       <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Connected Enterprise Systems</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                        {[
-                         { name: 'SAP S/4HANA (Titan)', status: 'Syncing', latency: '42ms', errors: 0, health: 100 },
-                         { name: 'Oracle TMS (Ocean)', status: 'Syncing', latency: '124ms', errors: 2, health: 98 },
-                         { name: 'WMS Global Hub (Global)', status: 'Warning', latency: '840ms', errors: 42, health: 64 },
-                         { name: 'GPS Master Feed', status: 'Syncing', latency: '12ms', errors: 0, health: 100 },
-                       ].map((sys, i) => (
-                         <div key={i} className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl flex items-center justify-between group hover:border-white/10 transition-all">
-                            <div className="flex items-center gap-4">
-                               <div className={`w-2 h-2 rounded-full ${sys.health > 90 ? 'bg-emerald-500' : 'bg-red-500'}`} />
-                               <div>
-                                  <div className="text-sm font-bold text-gray-200">{sys.name}</div>
-                                  <div className="text-[10px] font-black uppercase text-gray-600 tracking-tighter">{sys.status} • {sys.latency} Latency</div>
-                               </div>
+                         { name: 'Predictive ETA Gen-5', load: 'Critical High', latency: '12ms', reliability: '99.9%' },
+                         { name: 'Disruption Risk V2', load: 'Normal', latency: '45ms', reliability: '98.4%' },
+                         { name: 'Route Optimizer R-7', load: 'Optimized', latency: '240ms', reliability: '100%' },
+                         { name: 'LLM Extraction Hub', load: 'Normal', latency: '1.2s', reliability: '99.1%' },
+                       ].map((model, i) => (
+                         <div key={i} className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center justify-between">
+                            <div>
+                               <div className="text-sm font-bold text-gray-200">{model.name}</div>
+                               <div className="text-[10px] font-black uppercase text-gray-600">Reliability: {model.reliability}</div>
                             </div>
-                            <div className="flex items-center gap-6">
-                               {sys.errors > 0 && <div className="text-xs font-black text-red-500/80">{sys.errors} Errors</div>}
-                               <button className="text-[10px] font-black uppercase text-blue-400 hover:underline">Retry</button>
+                            <div className="text-right">
+                               <div className="text-xs font-black text-blue-400">{model.latency}</div>
+                               <div className="text-[8px] uppercase font-bold text-gray-500">{model.load}</div>
                             </div>
                          </div>
                        ))}
                     </div>
                   </div>
 
-                  {/* API Management */}
-                  <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl space-y-8">
-                     <div>
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6">Active API Scopes</h3>
-                        <div className="space-y-4">
-                           {['Shipment Write', 'Analytic Read', 'User Admin', 'Webhook Control'].map(scope => (
-                             <div key={scope} className="flex items-center justify-between px-4 py-3 bg-black/40 rounded-xl border border-white/5">
-                                <span className="text-xs font-bold text-gray-300">{scope}</span>
-                                <div className="w-8 h-4 bg-blue-600/20 rounded-full relative">
-                                   <div className="absolute right-1 top-1 bottom-1 w-2 bg-blue-500 rounded-full" />
-                                </div>
-                             </div>
-                           ))}
-                        </div>
-                     </div>
+                  {/* GPU & Infra Load */}
+                  <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-8">Infrastructure Compute</h3>
+                      <div className="space-y-8">
+                         <div>
+                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                               <span>GPU Utilization (H100 Cluster)</span>
+                               <span>84%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                               <div className="h-full bg-blue-500 w-[84%] shadow-[0_0_12px_#3b82f6]" />
+                            </div>
+                         </div>
+                         <div>
+                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                               <span>Memory Buffer</span>
+                               <span>22%</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                               <div className="h-full bg-emerald-500 w-[22%]" />
+                            </div>
+                         </div>
+                         <div>
+                            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">
+                               <span>Token Throughput</span>
+                               <span>92% Cap</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                               <div className="h-full bg-orange-500 w-[92%]" />
+                            </div>
+                         </div>
+                      </div>
+                    </div>
 
-                     <div className="pt-6 border-t border-white/5">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-4">API Usage Logs</h3>
-                        <div className="space-y-2">
-                           {[
-                             { endpoint: '/v1/shipments', code: 200, time: '2s ago' },
-                             { endpoint: '/v1/auth/token', code: 200, time: '14s ago' },
-                             { endpoint: '/v1/clients/list', code: 403, time: '1m ago' },
-                             { endpoint: '/v1/data/ingest', code: 500, time: '2m ago' },
-                           ].map((log, i) => (
-                             <div key={i} className="flex items-center justify-between text-[10px] font-mono">
-                                <div className="flex items-center gap-2">
-                                   <span className={log.code === 200 ? 'text-emerald-500' : 'text-red-500'}>[{log.code}]</span>
-                                   <span className="text-gray-400">{log.endpoint}</span>
-                                </div>
-                                <span className="text-gray-600">{log.time}</span>
-                             </div>
-                           ))}
-                        </div>
-                     </div>
-
-                     <button className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                        <ArrowUpRight size={14} /> Full Traffic Monitor
-                     </button>
+                    <div className="pt-8 border-t border-white/5">
+                      <div className="flex items-center gap-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
+                         <ShieldAlert size={20} className="text-red-500 shrink-0" />
+                         <p className="text-[10px] leading-relaxed text-red-500/80 font-bold uppercase tracking-tighter">
+                           Warning: Accuracy drop detected in EU-West-1 inference node due to regional weather drift.
+                         </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
              </motion.div>
            )}
 
+           {activeTab === 'billing' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Revenue & Billing Panel</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Full financial control center, client profitability, and enterprise invoicing.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl">
+                       Export Financials
+                    </button>
+                    <button className="px-6 py-3 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-500/20">
+                       Generate Monthly Audit
+                    </button>
+                  </div>
+                </div>
+
+                {/* Section A: Subscription Revenue Dashboard */}
+                <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl relative overflow-hidden">
+                   <div className="absolute right-0 top-0 w-1/3 h-full bg-gradient-to-l from-emerald-500/5 to-transparent pointer-events-none" />
+                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-emerald-500 mb-8 flex items-center gap-2">
+                      <TrendingUp size={16} /> Subscription Revenue Dashboard
+                   </h3>
+                   
+                   <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+                      <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
+                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Total ARR</div>
+                         <div className="text-3xl font-black font-display tracking-tighter">$45.2M</div>
+                         <div className="text-emerald-500 text-[10px] font-bold mt-2 flex items-center gap-1"><ArrowUpRight size={12} /> +15.4% YoY</div>
+                      </div>
+                      <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
+                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Current MRR</div>
+                         <div className="text-3xl font-black font-display tracking-tighter">$3.76M</div>
+                         <div className="text-emerald-500 text-[10px] font-bold mt-2 flex items-center gap-1"><ArrowUpRight size={12} /> +2.1% MoM</div>
+                      </div>
+                      <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
+                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Enterprise Rev.</div>
+                         <div className="text-3xl font-black font-display tracking-tighter text-blue-400">82%</div>
+                         <div className="text-gray-500 text-[10px] font-bold mt-2 flex items-center gap-1">Share of Total</div>
+                      </div>
+                      <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
+                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Upgrade Rev.</div>
+                         <div className="text-3xl font-black font-display tracking-tighter text-emerald-400">$840K</div>
+                         <div className="text-gray-500 text-[10px] font-bold mt-2 flex items-center gap-1">This Quarter</div>
+                      </div>
+                      <div className="p-6 bg-red-500/5 border border-red-500/10 rounded-3xl">
+                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Churn Rate</div>
+                         <div className="text-3xl font-black font-display tracking-tighter text-red-400">1.2%</div>
+                         <div className="text-emerald-500 text-[10px] font-bold mt-2 flex items-center gap-1"><ArrowDownRight size={12} /> -0.3% vs Q2</div>
+                      </div>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                   {/* Section B: Invoice Management */}
+                   <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl">
+                      <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-8 flex items-center gap-2">
+                         <Database size={16} /> Invoice Management
+                      </h3>
+
+                      <div className="flex gap-4 mb-8">
+                         <div className="flex-1 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-center">
+                            <div className="text-2xl font-black text-emerald-500 tracking-tighter mb-1">1,248</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500/60">Issued (30d)</div>
+                         </div>
+                         <div className="flex-1 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-center">
+                            <div className="text-2xl font-black text-red-500 tracking-tighter mb-1">14</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-red-500/60">Overdue</div>
+                         </div>
+                         <div className="flex-1 p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-center">
+                            <div className="text-2xl font-black text-orange-500 tracking-tighter mb-1">3</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-orange-500/60">Failed Alerts</div>
+                         </div>
+                      </div>
+
+                      <div className="space-y-4">
+                         <div className="text-[10px] font-black uppercase tracking-widest text-gray-500">Live Payment Tracking</div>
+                         {[
+                           { client: 'Ocean Carriers', status: 'Paid', amount: '$42,500', time: '2m ago' },
+                           { client: 'Swift Transports', status: 'Failed', amount: '$12,800', time: '14m ago', alert: true },
+                           { client: 'Titan Logistics', status: 'Processing', amount: '$122,000', time: '1h ago' },
+                           { client: 'Global Haulage', status: 'Overdue', amount: '$84,200', time: '3d ago', alert: true },
+                         ].map((tx, i) => (
+                           <div key={i} className={`flex items-center justify-between p-4 rounded-2xl border ${tx.alert ? 'bg-red-500/5 border-red-500/20' : 'bg-white/[0.02] border-white/5'}`}>
+                              <div>
+                                 <div className="text-sm font-bold text-gray-200">{tx.client}</div>
+                                 <div className={`text-[10px] font-black uppercase mt-1 ${
+                                    tx.status === 'Paid' ? 'text-emerald-500' :
+                                    tx.status === 'Failed' || tx.status === 'Overdue' ? 'text-red-500' : 'text-blue-400'
+                                 }`}>{tx.status}</div>
+                              </div>
+                              <div className="text-right">
+                                 <div className="text-sm font-mono font-bold text-white">{tx.amount}</div>
+                                 <div className="text-[10px] text-gray-500">{tx.time}</div>
+                              </div>
+                           </div>
+                         ))}
+                      </div>
+                   </div>
+
+                   {/* Section C: Client Billing Reports */}
+                   <div className="glass rounded-[40px] p-8 border-white/5 shadow-2xl flex flex-col justify-between">
+                      <div>
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-8 flex items-center gap-2">
+                            <BarChart3 size={16} /> Client Billing Reports
+                         </h3>
+
+                         <div className="space-y-6">
+                            {[
+                              { label: 'Platform Usage (API calls)', val: '86%', usage: '8.6M / 10M' },
+                              { label: 'Overage Billing Projected', val: '42%', usage: '$14.2K expected' },
+                              { label: 'Storage Usage (TB)', val: '92%', usage: '92TB / 100TB' },
+                            ].map((stat, i) => (
+                              <div key={i} className="p-4 bg-black/40 rounded-3xl border border-white/5">
+                                 <div className="flex justify-between items-center mb-3">
+                                    <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">{stat.label}</span>
+                                    <span className="text-[10px] font-mono text-blue-400">{stat.usage}</span>
+                                 </div>
+                                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-full bg-blue-500" style={{ width: stat.val }} />
+                                 </div>
+                              </div>
+                            ))}
+                         </div>
+
+                         <div className="mt-8 pt-8 border-t border-white/5">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">Contract Profitability High-Watermarks</h4>
+                            <div className="flex items-center justify-between p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                               <div className="flex items-center gap-4">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500 font-black">T</div>
+                                  <div>
+                                     <div className="text-sm font-bold text-gray-200">Titan Logistics</div>
+                                     <div className="text-[10px] font-black uppercase text-gray-500">Margin: +62%</div>
+                                  </div>
+                               </div>
+                               <button className="px-3 py-1 bg-white/5 text-[10px] font-black uppercase rounded-lg hover:bg-white/10 transition-colors">View Details</button>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'security' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Security & Compliance Center</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Enterprise trust, global governance, and advanced threat orchestration.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button className="px-6 py-3 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all shadow-xl">
+                       New Compliance Audit
+                    </button>
+                    <button className="px-6 py-3 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-500/20">
+                       Emergency Lockdown
+                    </button>
+                  </div>
+                </div>
+
+                {/* Section A: Compliance Dashboard */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                   <div className="lg:col-span-2 glass rounded-[40px] p-8 border-white/5 shadow-2xl">
+                      <div className="flex items-center justify-between mb-8">
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
+                            <ShieldCheck size={16} /> Compliance Dashboard
+                         </h3>
+                         <span className="text-[10px] font-black text-emerald-500 uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Audit Ready</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                         <div className="p-6 bg-white/5 border border-white/5 rounded-3xl text-center">
+                            <div className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">GDPR Readiness</div>
+                            <div className="relative w-20 h-20 mx-auto">
+                               <svg className="w-full h-full transform -rotate-90">
+                                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={226} strokeDashoffset={226 * 0.02} className="text-emerald-500" />
+                               </svg>
+                               <div className="absolute inset-0 flex items-center justify-center text-sm font-black italic">98%</div>
+                            </div>
+                         </div>
+                         <div className="p-6 bg-white/5 border border-white/5 rounded-3xl text-center">
+                            <div className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">ISO 27001</div>
+                            <div className="relative w-20 h-20 mx-auto">
+                               <svg className="w-full h-full transform -rotate-90">
+                                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={226} strokeDashoffset={226 * 0.05} className="text-blue-500" />
+                               </svg>
+                               <div className="absolute inset-0 flex items-center justify-center text-sm font-black italic">95%</div>
+                            </div>
+                         </div>
+                         <div className="p-6 bg-white/5 border border-white/5 rounded-3xl text-center">
+                            <div className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">SOC2 TYPE II</div>
+                            <div className="relative w-20 h-20 mx-auto">
+                               <svg className="w-full h-full transform -rotate-90">
+                                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
+                                  <circle cx="40" cy="40" r="36" stroke="currentColor" strokeWidth="8" fill="transparent" strokeDasharray={226} strokeDashoffset={0} className="text-emerald-500" />
+                               </svg>
+                               <div className="absolute inset-0 flex items-center justify-center text-sm font-black italic">100%</div>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="space-y-4">
+                         <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Client Compliance Reports</h4>
+                         {[
+                           { client: 'Titan Logistics', status: 'Compliant', lastAudit: '2d ago', score: 99 },
+                           { client: 'Swift Transports', status: 'Pending Review', lastAudit: '12d ago', score: 84 },
+                           { client: 'Ocean Carriers', status: 'Compliant', lastAudit: '1mo ago', score: 96 },
+                         ].map((report, i) => (
+                           <div key={i} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                              <div className="flex items-center gap-4">
+                                 <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-400 font-black">
+                                    {report.client[0]}
+                                 </div>
+                                 <div>
+                                    <div className="text-sm font-bold text-gray-200">{report.client}</div>
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase">Last Audit: {report.lastAudit}</div>
+                                 </div>
+                              </div>
+                              <div className="flex items-center gap-8">
+                                 <div className="text-right">
+                                    <div className={`text-[10px] font-black uppercase ${report.status === 'Compliant' ? 'text-emerald-500' : 'text-yellow-500'}`}>{report.status}</div>
+                                    <div className="text-xs font-mono font-bold text-gray-400">Score: {report.score}</div>
+                                 </div>
+                                 <button className="p-2 hover:bg-white/5 rounded-lg transition-colors"><ArrowUpRight size={14} className="text-gray-500" /></button>
+                              </div>
+                           </div>
+                         ))}
+                      </div>
+                   </div>
+
+                   {/* Section B: Threat Detection Center */}
+                   <div className="glass rounded-[40px] p-8 border-red-500/20 bg-red-950/5 relative overflow-hidden backdrop-blur-2xl">
+                      <div className="flex items-center justify-between mb-8">
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 flex items-center gap-2">
+                            <ShieldAlert size={20} className="animate-pulse" /> Threat Detection
+                         </h3>
+                         <span className="text-[10px] font-black text-red-500 uppercase bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">3 High Priority</span>
+                      </div>
+
+                      <div className="space-y-6">
+                         <div>
+                            <div className="text-[10px] font-black text-gray-500 uppercase mb-4 tracking-widest">Active Threats (Global)</div>
+                            <div className="space-y-3">
+                               {[
+                                 { type: 'Breach Attempt', origin: 'CN-Shenzhen', target: 'Auth-API', status: 'Blocked', time: '12m ago' },
+                                 { type: 'Suspicious Activity', origin: 'RU-Moscow', target: 'Titan-ERP-Sync', status: 'Flagged', time: '1h ago' },
+                                 { type: 'Insider Risk', origin: 'US-Chicago', target: 'Mass-Export-PDF', status: 'Review', time: '3h ago' },
+                               ].map((threat, i) => (
+                                 <div key={i} className="p-4 bg-black/40 rounded-2xl border border-white/5">
+                                    <div className="flex justify-between items-start mb-2">
+                                       <span className="text-[10px] font-black text-red-400 uppercase tracking-tighter italic">{threat.type}</span>
+                                       <span className="text-[8px] text-gray-600 font-bold uppercase">{threat.time}</span>
+                                    </div>
+                                    <p className="text-xs font-bold text-gray-200 mb-2">{threat.origin} → {threat.target}</p>
+                                    <div className={`text-[8px] font-black uppercase inline-block px-2 py-0.5 rounded-full border ${
+                                       threat.status === 'Blocked' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 
+                                       threat.status === 'Flagged' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 
+                                       'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                    }`}>{threat.status}</div>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+
+                         <div className="pt-6 border-t border-white/5">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">Insider Risk Score</h4>
+                            <div className="space-y-4">
+                               <div className="flex justify-between items-center bg-black/20 p-4 rounded-2xl border border-white/5">
+                                  <div className="flex items-center gap-3">
+                                     <Fingerprint size={16} className="text-red-500" />
+                                     <span className="text-xs font-bold text-gray-300">Anomalous Data Access</span>
+                                  </div>
+                                  <span className="text-xs font-black text-red-500">84/100</span>
+                               </div>
+                               <div className="flex justify-between items-center bg-black/20 p-4 rounded-2xl border border-white/5">
+                                  <div className="flex items-center gap-3">
+                                     <Eye size={16} className="text-yellow-500" />
+                                     <span className="text-xs font-bold text-gray-300">Off-Hours Traffic</span>
+                                  </div>
+                                  <span className="text-xs font-black text-yellow-500">42/100</span>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Section C: Encryption Monitoring */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                   <div className="lg:col-span-3 glass rounded-[40px] p-8 border-white/5 shadow-2xl">
+                      <div className="flex items-center justify-between mb-8">
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 flex items-center gap-2">
+                            <Lock size={16} /> Encryption Monitoring
+                         </h3>
+                         <div className="flex gap-4">
+                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" /> <span className="text-[10px] font-black uppercase text-gray-400">At Rest: AES-256</span></div>
+                            <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]" /> <span className="text-[10px] font-black uppercase text-gray-400">In Transit: TLS 1.3</span></div>
+                         </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Storage Security Matrix</h4>
+                            <div className="space-y-6">
+                               {[
+                                 { storage: 'Primary Data Lake', encrypted: true, type: 'Customer Managed Key', status: 'Healthy' },
+                                 { storage: 'Transaction Logs', encrypted: true, type: 'Platform Managed Key', status: 'Healthy' },
+                                 { storage: 'AI Training Sets', encrypted: true, type: 'Hardware Security Module', status: 'Re-keying' },
+                                 { storage: 'Cold Archive', encrypted: true, type: 'Multi-layer PGP', status: 'Healthy' },
+                               ].map((s, i) => (
+                                 <div key={i} className="flex items-center justify-between">
+                                    <div>
+                                       <div className="text-sm font-bold text-gray-200">{s.storage}</div>
+                                       <div className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">{s.type}</div>
+                                    </div>
+                                    <div className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase ${s.status === 'Healthy' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'}`}>
+                                       {s.status}
+                                    </div>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+
+                         <div className="relative">
+                            <div className="absolute inset-0 bg-blue-600/5 blur-[80px] pointer-events-none" />
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-6">Global Transfer Monitoring</h4>
+                            <div className="h-64 flex items-center justify-center">
+                               <div className="relative w-48 h-48">
+                                  <div className="absolute inset-0 rounded-full border border-blue-500/20 animate-ping opacity-20" />
+                                  <div className="absolute inset-4 rounded-full border border-blue-500/40 animate-pulse" />
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                     <Globe size={40} className="text-blue-500 mb-2" />
+                                     <div className="text-2xl font-black font-display italic">100%</div>
+                                     <div className="text-[8px] font-black uppercase text-gray-500 tracking-widest italic">Encrypted Traffic</div>
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="glass rounded-[40px] p-6 border-blue-500/10 bg-blue-950/5 flex flex-col justify-between">
+                      <div>
+                         <h3 className="text-xs font-black uppercase tracking-widest text-blue-400 mb-6">Hardening Protocols</h3>
+                         <div className="space-y-4">
+                            <div className="p-4 bg-black/40 rounded-2xl border border-white/5 space-y-2">
+                               <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
+                                  <span>Network Isolation</span>
+                                  <span className="text-emerald-500">Active</span>
+                               </div>
+                               <div className="h-1 w-full bg-white/5 rounded-full">
+                                  <div className="h-full bg-emerald-500 w-full" />
+                               </div>
+                            </div>
+                            <div className="p-4 bg-black/40 rounded-2xl border border-white/5 space-y-2">
+                               <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
+                                  <span>Zero-Trust Verification</span>
+                                  <span className="text-emerald-500">Active</span>
+                               </div>
+                               <div className="h-1 w-full bg-white/5 rounded-full">
+                                  <div className="h-full bg-emerald-500 w-full" />
+                               </div>
+                            </div>
+                            <div className="p-4 bg-black/40 rounded-2xl border border-white/5 space-y-2">
+                               <div className="flex justify-between items-center text-[10px] font-black uppercase text-gray-400">
+                                  <span>Key Rotation (Auto)</span>
+                                  <span className="text-blue-400">Running</span>
+                               </div>
+                               <div className="h-1 w-full bg-white/5 rounded-full">
+                                  <div className="h-full bg-blue-500 w-3/4" />
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                      <button className="w-full mt-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
+                         Rotate Global Master Key
+                      </button>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'health' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Platform Health</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Global infrastructure telemetry, regional uptime, and incident lifecycle management.</p>
+                  </div>
+                  <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all">
+                     View Status Page
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                   {['Global API', 'Data Lake', 'Auth Service', 'AI Inference'].map((service, i) => (
+                     <div key={i} className="glass p-6 rounded-3xl border-white/5 shadow-xl relative overflow-hidden group">
+                        <div className="flex justify-between items-start mb-4">
+                           <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">{service}</h3>
+                           <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                        </div>
+                        <div className="text-3xl font-black mb-1">99.99%</div>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase">Uptime • 30 Days</p>
+                     </div>
+                   ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                   <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl lg:col-span-2">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-8">Regional Latency Telemetry</h3>
+                      <div className="h-64">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={[
+                              { name: '12:00', us: 42, eu: 38, apac: 112 },
+                              { name: '13:00', us: 45, eu: 35, apac: 124 },
+                              { name: '14:00', us: 41, eu: 42, apac: 118 },
+                              { name: '15:00', us: 38, eu: 44, apac: 105 },
+                              { name: '16:00', us: 40, eu: 32, apac: 98 },
+                            ]}>
+                               <XAxis dataKey="name" hide />
+                               <YAxis hide />
+                               <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px' }} />
+                               <Line type="monotone" dataKey="us" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                               <Line type="monotone" dataKey="eu" stroke="#10b981" strokeWidth={3} dot={false} />
+                               <Line type="monotone" dataKey="apac" stroke="#f59e0b" strokeWidth={3} dot={false} />
+                            </LineChart>
+                         </ResponsiveContainer>
+                      </div>
+                      <div className="flex gap-6 mt-6 justify-center">
+                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400"><div className="w-2 h-2 rounded-full bg-blue-500" /> US-East</div>
+                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400"><div className="w-2 h-2 rounded-full bg-emerald-500" /> EU-Central</div>
+                         <div className="flex items-center gap-2 text-[10px] font-black uppercase text-gray-400"><div className="w-2 h-2 rounded-full bg-amber-500" /> APAC-South</div>
+                      </div>
+                   </div>
+
+                   <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl space-y-6">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Active Incidents</h3>
+                      <div className="space-y-4">
+                        <div className="p-5 bg-orange-500/10 border border-orange-500/20 rounded-3xl">
+                           <div className="flex justify-between text-[10px] font-black text-orange-500 uppercase mb-2">
+                              <span>Investigating</span>
+                              <span>12m ago</span>
+                           </div>
+                           <h4 className="text-sm font-bold text-gray-100 mb-1">Latency Spike - APAC</h4>
+                           <p className="text-[10px] text-gray-500 font-medium leading-relaxed italic">Engineers are investigating elevated latency across Tokyo nodes.</p>
+                        </div>
+                        <button className="w-full py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all">
+                           Report Global Incident
+                        </button>
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'reports' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Reports & Analytics</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Executive insights, operational telemetry, and board-level reporting.</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button className="px-6 py-3 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center gap-2">
+                       <ArrowDownRight size={16} /> Export PDF
+                    </button>
+                    <button className="px-6 py-3 bg-emerald-600/10 text-emerald-500 border border-emerald-500/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-600/20 transition-all flex items-center gap-2">
+                       <ArrowDownRight size={16} /> Export Excel
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                   {/* Operational & Executive Analytics */}
+                   <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl lg:col-span-2 space-y-8">
+                      <div className="flex justify-between items-center mb-6">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-blue-400">Operational Analytics & Ecosystem Growth</h3>
+                         <div className="bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 text-[10px] text-blue-500 font-black uppercase">Live Telemetry</div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                         <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                            <div className="text-[10px] font-black uppercase text-gray-500 mb-1">Global Shipments</div>
+                            <div className="text-2xl font-black font-display tracking-tighter">1.8M</div>
+                            <div className="text-[10px] text-emerald-500 mt-1 font-bold">+12% MoM</div>
+                         </div>
+                         <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                            <div className="text-[10px] font-black uppercase text-gray-500 mb-1">Total Payload (TEU)</div>
+                            <div className="text-2xl font-black font-display tracking-tighter">4.2M</div>
+                            <div className="text-[10px] text-emerald-500 mt-1 font-bold">+8% MoM</div>
+                         </div>
+                         <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                            <div className="text-[10px] font-black uppercase text-gray-500 mb-1">Cost Avoidance</div>
+                            <div className="text-2xl font-black font-display tracking-tighter text-emerald-400">$84M</div>
+                            <div className="text-[10px] text-gray-500 mt-1 font-bold">Via AI Routing</div>
+                         </div>
+                         <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                            <div className="text-[10px] font-black uppercase text-gray-500 mb-1">Carbon Saved (t)</div>
+                            <div className="text-2xl font-black font-display tracking-tighter text-emerald-400">224K</div>
+                            <div className="text-[10px] text-gray-500 mt-1 font-bold">Via AI Routing</div>
+                         </div>
+                      </div>
+
+                      <div className="h-64">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={[
+                              { name: 'Jan', val: 4.2 }, { name: 'Feb', val: 5.8 },
+                              { name: 'Mar', val: 6.4 }, { name: 'Apr', val: 8.4 },
+                              { name: 'May', val: 9.1 }, { name: 'Jun', val: 12.4 },
+                            ]}>
+                               <defs>
+                                <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                                </linearGradient>
+                               </defs>
+                               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                               <XAxis dataKey="name" stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false} />
+                               <YAxis stroke="rgba(255,255,255,0.2)" fontSize={12} tickLine={false} axisLine={false} />
+                               <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px' }} />
+                               <Area type="monotone" dataKey="val" stroke="#3b82f6" strokeWidth={5} fillOpacity={1} fill="url(#colorGrowth)" />
+                            </AreaChart>
+                         </ResponsiveContainer>
+                      </div>
+                   </div>
+
+                   {/* Strategic Summaries */}
+                   <div className="space-y-6">
+                      <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl flex flex-col justify-between">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-emerald-500 mb-6 w-full flex items-center gap-2">
+                            <TrendingUp size={16} /> Board-Level Summaries
+                         </h3>
+                         <div className="space-y-4">
+                            <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl group cursor-pointer hover:bg-white/[0.05] transition-all">
+                               <div className="flex justify-between items-center mb-1">
+                                  <span className="text-xs font-bold text-gray-200">Q2 Strategic Review</span>
+                                  <span className="text-[10px] font-mono text-gray-500">PDF • 2.4MB</span>
+                               </div>
+                               <p className="text-[10px] text-gray-400 line-clamp-2">Comprehensive overview of global expansion, market penetration modeling, and competitive moat analysis.</p>
+                            </div>
+                            <div className="p-4 bg-white/[0.02] border border-white/5 rounded-2xl group cursor-pointer hover:bg-white/[0.05] transition-all">
+                               <div className="flex justify-between items-center mb-1">
+                                  <span className="text-xs font-bold text-gray-200">Expansion Modeling FY27</span>
+                                  <span className="text-[10px] font-mono text-gray-500">XLSX • 1.1MB</span>
+                               </div>
+                               <p className="text-[10px] text-gray-400 line-clamp-2">Financial projections, CapEx requirements, and expected EBITDA margins for the upcoming fiscal cycle.</p>
+                            </div>
+                         </div>
+                      </div>
+
+                      <div className="glass p-8 rounded-[40px] border-amber-500/10 bg-amber-950/5 flex flex-col justify-between">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-amber-500 mb-6 flex items-center gap-2">
+                            <Briefcase size={16} /> Investor Reports
+                         </h3>
+                         <div className="space-y-4 mb-6">
+                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                               <span>Annual Run Rate (ARR)</span>
+                               <span className="text-amber-500">$45.2M</span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                               <span>Customer Acquisition Cost</span>
+                               <span className="text-amber-500">$12.4K</span>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-400">
+                               <span>Lifetime Value (LTV)</span>
+                               <span className="text-amber-500">$1.8M</span>
+                            </div>
+                         </div>
+                         <button className="w-full py-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-500/20 transition-all text-center">
+                            Generate Pitch Deck Data
+                         </button>
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'support' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Support & Escalations</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Enterprise-grade issue resolution and platinum-tier support orchestration.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                   <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl space-y-8">
+                      <div>
+                        <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-2">Escalation Velocity</h3>
+                        <div className="text-4xl font-black">2.4h</div>
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">Avg. Resolution Time</p>
+                      </div>
+                      <div className="space-y-4 pt-8 border-t border-white/5">
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                           <span>Open Tickets</span>
+                           <span className="text-white">124</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                           <span>SLA Breaches (24h)</span>
+                           <span className="text-red-500">0</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500">
+                           <span>Client Satisfaction</span>
+                           <span className="text-emerald-500">4.9/5</span>
+                        </div>
+                      </div>
+                   </div>
+
+                   <div className="lg:col-span-3 glass p-8 rounded-[40px] border-white/5 shadow-2xl">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-8">Critical Escalation Feed</h3>
+                      <div className="space-y-4">
+                        {[
+                          { id: 'SC-842', client: 'Ocean Carriers', priority: 'Critical', issue: 'Failed Rerouting Engine on 400 shipments', status: 'In Progress', owner: 'Senior Engineering' },
+                          { id: 'SC-839', client: 'Titan Logistics', priority: 'High', issue: 'API Key Revocation Request - Security Breach', status: 'Investigating', owner: 'Platform Security' },
+                          { id: 'SC-832', client: 'Swift Transports', priority: 'Medium', issue: 'Onboarding Delay - ERP Sync Failure', status: 'Pending', owner: 'Customer Success' },
+                        ].map((ticket, i) => (
+                           <div key={i} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl flex items-center justify-between group hover:border-white/10 transition-all cursor-pointer">
+                              <div className="flex items-center gap-6">
+                                 <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${ticket.priority === 'Critical' ? 'bg-red-500/20 text-red-500' : ticket.priority === 'High' ? 'bg-orange-500/20 text-orange-500' : 'bg-blue-500/20 text-blue-500'}`}>
+                                    {ticket.priority}
+                                 </div>
+                                 <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                       <span className="text-[10px] font-mono text-gray-600">{ticket.id}</span>
+                                       <span className="text-sm font-bold text-gray-200">{ticket.client}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-400 font-medium italic">{ticket.issue}</p>
+                                 </div>
+                              </div>
+                              <div className="text-right">
+                                 <div className="text-[10px] font-black text-blue-400 uppercase tracking-tighter mb-1">{ticket.status}</div>
+                                 <div className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Assigned: {ticket.owner}</div>
+                              </div>
+                           </div>
+                        ))}
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'settings' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20 max-w-6xl mx-auto">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">System Settings</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Platform branding, operational thresholds, and global disaster recovery controls.</p>
+                  </div>
+                  <button className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">
+                     Commit Global Config
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                   <div className="space-y-6">
+                      {/* Platform Branding */}
+                      <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl">
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2 text-emerald-500">
+                            <Settings size={16} /> Platform Branding
+                         </h3>
+                         <div className="space-y-4">
+                            <div>
+                               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 mb-1 block">Platform Name</label>
+                               <input type="text" defaultValue="Titan Global OS" className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-bold text-white focus:border-blue-500 focus:outline-none transition-colors" />
+                            </div>
+                            <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                               <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center font-black text-xl italic text-white shadow-lg">T</div>
+                                  <div>
+                                     <div className="text-sm font-bold text-gray-200">Primary Monogram</div>
+                                     <div className="text-[10px] font-mono text-gray-500">512x512 PNG</div>
+                                  </div>
+                               </div>
+                               <button className="text-[10px] font-black uppercase text-blue-400 hover:text-blue-300">Update</button>
+                            </div>
+                            <div>
+                               <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 mb-1 block">Accent Hex Strategy</label>
+                               <div className="flex gap-2">
+                                  <div className="h-10 flex-1 bg-blue-600 rounded-xl border border-white/10 flex items-center justify-center text-[10px] font-mono font-black">#3B82F6</div>
+                                  <div className="h-10 flex-1 bg-emerald-500 rounded-xl border border-white/10 flex items-center justify-center text-[10px] font-mono font-black text-black">#10B981</div>
+                                  <div className="h-10 flex-1 bg-slate-900 rounded-xl border border-white/10 flex items-center justify-center text-[10px] font-mono font-black text-white">#0F172A</div>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+
+                      {/* Notif & SLAs */}
+                      <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl">
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 pb-6 border-b border-white/5 text-blue-400">
+                            Notification & SLA Overrides
+                         </h3>
+                         <div className="space-y-6">
+                            <div>
+                               <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm font-bold text-white">Global Alert Threshold</span>
+                                  <span className="text-[10px] font-black uppercase text-blue-400 border border-blue-500/20 px-2 py-1 rounded-md bg-blue-500/10">Critical Only</span>
+                               </div>
+                               <p className="text-[10px] text-gray-500 italic mb-4">Dictates minimum severity required to trigger SMS / PagerDuty to executive staff.</p>
+                            </div>
+                            <div className="space-y-3">
+                               <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                  <span className="text-xs font-bold text-gray-300">SLA Response (Platinum)</span>
+                                  <span className="text-xs font-mono text-emerald-400">15 mins</span>
+                               </div>
+                               <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
+                                  <span className="text-xs font-bold text-gray-300">SLA Response (Standard)</span>
+                                  <span className="text-xs font-mono text-gray-400">4 hours</span>
+                               </div>
+                               <div className="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                  <span className="text-xs font-bold text-red-500">Auto-Escalation Breach</span>
+                                  <span className="text-xs font-mono text-red-400">T + 60 mins</span>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="space-y-6">
+                      {/* Automation Rules */}
+                      <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl">
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-6 text-purple-400">
+                            Global Automation Engine
+                         </h3>
+                         <div className="space-y-4">
+                            {[
+                              { rule: 'Auto-Reroute on Weather', trigger: 'Category 3 Storm', action: 'Move to Rail/Air', active: true },
+                              { rule: 'Port Strike Bypass', trigger: 'Labor Alert > 80%', action: 'Divert to Secondary', active: true },
+                              { rule: 'Predictive Maintenance', trigger: 'Vessel Sensor Err', action: 'Schedule Inspection', active: false },
+                            ].map((auto, i) => (
+                              <div key={i} className="p-4 bg-black/40 border border-white/5 rounded-2xl flex items-center justify-between opacity-100 hover:border-white/20 transition-all cursor-pointer">
+                                 <div>
+                                    <div className="text-sm font-bold text-gray-200">{auto.rule}</div>
+                                    <div className="text-[10px] text-gray-500 font-mono mt-1">IF: {auto.trigger} → THEN: {auto.action}</div>
+                                 </div>
+                                 <button className={`w-10 h-5 rounded-full relative border ${auto.active ? 'bg-emerald-600 border-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-white/5 border-white/20'}`}>
+                                    <div className={`absolute top-0.5 bottom-0.5 w-4 rounded-full transition-all ${auto.active ? 'right-0.5 bg-white' : 'left-0.5 bg-gray-500'}`} />
+                                 </button>
+                              </div>
+                            ))}
+                         </div>
+                      </div>
+
+                      {/* Backup & DR */}
+                      <div className="glass p-8 rounded-[40px] border-red-500/10 bg-red-950/10 shadow-2xl space-y-8 relative overflow-hidden">
+                         <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-b from-red-500 to-transparent" />
+                         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-red-500 flex items-center gap-2">
+                            <ShieldAlert size={16} /> Backup & Disaster Recovery
+                         </h3>
+                         
+                         <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                               <div className="text-[10px] font-black uppercase text-gray-500 mb-1">Cold Storage Sync</div>
+                               <div className="text-xl font-black text-white">4h 12m ago</div>
+                               <div className="text-[10px] text-emerald-500 font-bold mt-1">Verified Integrity</div>
+                            </div>
+                            <div className="p-4 bg-white/5 border border-white/5 rounded-2xl">
+                               <div className="text-[10px] font-black uppercase text-gray-500 mb-1">Failover Region</div>
+                               <div className="text-xl font-black text-white">EU-Central</div>
+                               <div className="text-[10px] text-blue-400 font-bold mt-1">Latency: 12ms</div>
+                            </div>
+                         </div>
+
+                         <div className="space-y-4 pt-6 border-t border-white/10">
+                            <div className="flex items-center justify-between">
+                               <div>
+                                  <h4 className="text-sm font-bold text-gray-200">Continuous Snapshot Replication</h4>
+                                  <p className="text-[10px] text-gray-500 italic mt-1">Delta backups pushed to deep freeze every 5 minutes.</p>
+                               </div>
+                               <div className="text-xs font-black uppercase text-emerald-500 border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 rounded-lg">Active</div>
+                            </div>
+                         </div>
+
+                         <div className="p-5 bg-red-500/10 border border-red-500/30 rounded-2xl">
+                            <h4 className="text-xs font-black uppercase text-red-500 mb-2 flex items-center gap-2">
+                               <AlertTriangle size={14} /> Total System Failover
+                            </h4>
+                            <p className="text-[10px] text-red-400/80 leading-relaxed italic mb-4">
+                               Initiates immediate traffic diversion to the EU-Central shadow infrastructure. This will temporarily degrade API writing speed. Use only in apocalyptic DR scenarios.
+                            </p>
+                            <button className="w-full py-3 bg-red-600 text-white font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20">
+                               Initialize Failover Protocol
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
+           {activeTab === 'profile' && (
+             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 pb-20 max-w-4xl">
+                <div className="flex justify-between items-end">
+                  <div>
+                    <h1 className="text-4xl font-display font-black tracking-tight mb-2 uppercase italic">Super Admin Profile</h1>
+                    <p className="text-gray-400 font-light text-lg italic">Secured administrative identity and access key management.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                   <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl lg:col-span-1 flex flex-col items-center text-center">
+                      <div className="w-32 h-32 rounded-full border-4 border-blue-600 p-1 mb-6 relative group overflow-hidden">
+                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=SuperAdmin" alt="Admin" className="w-full h-full rounded-full bg-slate-800" />
+                         <div className="absolute inset-0 bg-blue-600/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer">
+                            <LayoutGrid size={24} className="text-white" />
+                         </div>
+                      </div>
+                      <h2 className="text-2xl font-black italic uppercase tracking-tighter">Alexander Sterling</h2>
+                      <p className="text-blue-400 text-xs font-black uppercase tracking-widest mt-1">Platform Systems Director</p>
+                      <div className="mt-8 pt-8 border-t border-white/5 w-full space-y-4">
+                         <div className="flex justify-between text-[10px] font-bold uppercase text-gray-500 tracking-widest text-left">
+                            <span>Admin Tier</span>
+                            <span className="text-emerald-500">Root / Master</span>
+                         </div>
+                         <div className="flex justify-between text-[10px] font-bold uppercase text-gray-500 tracking-widest text-left">
+                            <span>Key Type</span>
+                            <span className="text-blue-400">Yubico Physical</span>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="lg:col-span-2 space-y-6">
+                      <div className="glass p-8 rounded-[40px] border-white/5 shadow-2xl">
+                         <h3 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-8 italic">Security Settings</h3>
+                         <div className="space-y-6">
+                            <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex items-center justify-between">
+                               <div>
+                                  <h4 className="text-sm font-bold text-gray-200">Hardware Security Key</h4>
+                                  <p className="text-[10px] text-gray-500">Physical MFA is required for all root actions.</p>
+                               </div>
+                               <button className="px-4 py-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase rounded-xl">Verified</button>
+                            </div>
+                            <div className="p-5 bg-white/5 rounded-3xl border border-white/5 flex items-center justify-between">
+                               <div>
+                                  <h4 className="text-sm font-bold text-gray-200">IP Whitelisting</h4>
+                                  <p className="text-[10px] text-gray-500">Restrict admin login to registered corporate VPN IPs.</p>
+                               </div>
+                               <button className="px-4 py-2 bg-blue-600/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase rounded-xl">Manage</button>
+                            </div>
+                            <button className="w-full py-4 bg-red-600/10 border border-red-500/30 text-red-500 rounded-2xl font-black text-xs uppercase tracking-widest">
+                               Initiate Emergency Account Purge
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </motion.div>
+           )}
+
            {/* Placeholder for other tabs */}
-           {activeTab !== 'command' && activeTab !== 'companies' && activeTab !== 'users' && (
+           {activeTab !== 'command' && activeTab !== 'companies' && activeTab !== 'users' && activeTab !== 'integrations' && activeTab !== 'ai' && activeTab !== 'billing' && activeTab !== 'security' && activeTab !== 'health' && activeTab !== 'reports' && activeTab !== 'support' && activeTab !== 'settings' && activeTab !== 'profile' && (
              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="h-full flex items-center justify-center flex-col text-center p-20 border-2 border-dashed border-white/5 rounded-[60px] bg-white/[0.02] m-8">
                  <div className="w-32 h-32 bg-blue-600/10 rounded-[40px] flex items-center justify-center mb-8 border border-blue-500/20 shadow-2xl shadow-blue-600/20">
                    {(() => {
