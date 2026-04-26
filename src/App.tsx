@@ -17,6 +17,9 @@ import SuperAdminDashboard from './pages/dashboards/SuperAdminDashboard';
 
 import CompanyAdminDashboard from './pages/dashboards/CompanyAdminDashboard';
 import OperationsManagerDashboard from './pages/dashboards/OperationsManagerDashboard';
+import AnalystDashboard from './pages/dashboards/AnalystDashboard';
+import FieldExecutiveDashboard from './pages/dashboards/FieldExecutiveDashboard';
+import ViewerDashboard from './pages/dashboards/ViewerDashboard';
 
 export default function App() {
   const { scrollYProgress } = useScroll();
@@ -52,6 +55,9 @@ export default function App() {
         <Route path="/dashboard/super-admin" element={<SuperAdminDashboard />} />
         <Route path="/dashboard/company-admin" element={<CompanyAdminDashboard />} />
         <Route path="/dashboard/operations-manager" element={<OperationsManagerDashboard />} />
+        <Route path="/dashboard/analyst" element={<AnalystDashboard />} />
+        <Route path="/dashboard/field-executive" element={<FieldExecutiveDashboard />} />
+        <Route path="/dashboard/viewer" element={<ViewerDashboard />} />
       </Routes>
 
       {/* Decorative background elements */}

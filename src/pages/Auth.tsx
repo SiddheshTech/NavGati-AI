@@ -20,9 +20,15 @@ export default function Auth() {
       navigate('/dashboard/company-admin');
     } else if (role === 'operations_manager') {
       navigate('/dashboard/operations-manager');
+    } else if (role === 'analyst') {
+      navigate('/dashboard/analyst');
+    } else if (role === 'field_exec') {
+      navigate('/dashboard/field-executive');
+    } else if (role === 'viewer') {
+      navigate('/dashboard/viewer');
     } else {
       // Default fallback for demo purposes
-      navigate('/dashboard/operations-manager');
+      navigate('/dashboard/viewer');
     }
   };
 
